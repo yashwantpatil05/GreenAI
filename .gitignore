@@ -1,0 +1,24 @@
+# Node / frontend
+node_modules/
+.next/
+out/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv*/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
