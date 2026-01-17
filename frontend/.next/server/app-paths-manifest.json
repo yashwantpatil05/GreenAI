@@ -1,0 +1,9 @@
+{
+  "/reports/page": "app/reports/page.js",
+  "/api-keys/page": "app/api-keys/page.js",
+  "/projects/page": "app/projects/page.js",
+  "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/job-runs/page": "app/job-runs/page.js",
+  "/compare/page": "app/compare/page.js"
+}

@@ -1,0 +1,222 @@
+/* GreenAI/frontend/app/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   GreenAI Premium Theme (Carbon / Sustainability flavor)
+   - ThemeToggle adds "light"/"dark" on <html>
+   - Tailwind tokens map via tailwind.config.js:
+     bg-background, text-foreground, border-border, etc.
+   ========================================================= */
+
+@layer base {
+  :root,
+  html.light {
+    /* Core */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    /* Surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Brand (Eco green) */
+    --primary: 142 72% 31%;
+    --primary-foreground: 0 0% 100%;
+
+    /* UI */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 46%;
+
+    --accent: 154 45% 95%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders / Inputs / Rings */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 72% 33%;
+
+    /* Radius */
+    --radius: 1rem;
+
+    /* Chart palette */
+    --chart-1: 142 72% 33%;
+    --chart-2: 199 90% 48%;
+    --chart-3: 40 95% 55%;
+    --chart-4: 262 83% 58%;
+    --chart-5: 0 84% 60%;
+
+    /* Decorative aurora */
+    --gai-aurora-1: 142 72% 33%;
+    --gai-aurora-2: 199 90% 48%;
+    --gai-aurora-3: 40 95% 55%;
+  }
+
+  html.dark {
+    /* Core */
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+
+    /* Surfaces */
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Brand */
+    --primary: 142 72% 42%;
+    --primary-foreground: 222 47% 7%;
+
+    /* UI */
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 14%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 142 72% 44%;
+
+    --radius: 1rem;
+
+    --chart-1: 142 72% 44%;
+    --chart-2: 199 90% 58%;
+    --chart-3: 40 95% 62%;
+    --chart-4: 262 83% 68%;
+    --chart-5: 0 84% 66%;
+
+    --gai-aurora-1: 142 72% 44%;
+    --gai-aurora-2: 199 90% 58%;
+    --gai-aurora-3: 40 95% 62%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100%;
+    @apply bg-background text-foreground;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Subtle eco aurora background */
+    background-image:
+      radial-gradient(1200px 600px at 15% -10%, hsl(var(--gai-aurora-1) / 0.18), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, hsl(var(--gai-aurora-2) / 0.14), transparent 55%),
+      radial-gradient(900px 500px at 40% 110%, hsl(var(--gai-aurora-3) / 0.10), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.25);
+    border-radius: 0.75rem;
+  }
+}
+
+/* =========================================================
+   Utilities / polish
+   ========================================================= */
+@layer utilities {
+  .gai-container {
+    @apply mx-auto w-full max-w-[1400px];
+  }
+
+  .gai-glass {
+    background: hsl(var(--background) / 0.72);
+    backdrop-filter: blur(12px);
+  }
+
+  .gai-card {
+    @apply rounded-2xl border bg-card text-card-foreground;
+    box-shadow:
+      0 1px 0 0 hsl(var(--border) / 0.7),
+      0 18px 40px -28px hsl(0 0% 0% / 0.35);
+  }
+
+  .gai-soft-shadow {
+    box-shadow:
+      0 1px 0 0 hsl(var(--border) / 0.75),
+      0 14px 36px -26px hsl(0 0% 0% / 0.35);
+  }
+
+  .gai-chip {
+    @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs;
+    background: hsl(var(--muted) / 0.45);
+  }
+
+  .gai-fade-in {
+    animation: gaiFadeIn 220ms ease-out both;
+  }
+
+  .gai-slide-up {
+    animation: gaiSlideUp 240ms ease-out both;
+  }
+
+  .gai-hover-lift {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .gai-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 0 hsl(var(--border) / 0.75),
+      0 20px 48px -30px hsl(0 0% 0% / 0.45);
+  }
+
+  .gai-divider {
+    height: 1px;
+    background: hsl(var(--border) / 0.75);
+  }
+}
+
+@keyframes gaiFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes gaiSlideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.22);
+    border-radius: 999px;
+    border: 2px solid hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.32);
+  }
+}

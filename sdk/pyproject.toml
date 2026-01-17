@@ -1,0 +1,11 @@
+[project]
+name = "greenai-sdk"
+version = "0.1.0"
+description = "GreenAI telemetry SDK"
+authors = [{ name = "GreenAI", email = "support@greenai.local" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["psutil", "requests", "pydantic>=1.10"]
+
+[project.scripts]
+greenai-cli = "greenai_sdk.cli:main"

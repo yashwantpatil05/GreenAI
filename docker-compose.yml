@@ -1,0 +1,114 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: greenai
+      POSTGRES_PASSWORD: greenai
+      POSTGRES_DB: greenai
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  storage:
+    image: minio/minio:RELEASE.2023-09-16T01-01-47Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ACCESS_KEY: greenai
+      MINIO_SECRET_KEY: greenai_secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - storage_data:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: services/backend/Dockerfile
+    command: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql+psycopg2://greenai:greenai@postgres:5432/greenai
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://storage:9000
+      S3_ACCESS_KEY: greenai
+      S3_SECRET_KEY: greenai_secret
+      S3_BUCKET: greenai-reports
+    volumes:
+      - ./backend:/code/backend
+      - ./migrations:/code/migrations
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - storage
+      - migrations
+
+  migrations:
+    build:
+      context: .
+      dockerfile: services/migrations/Dockerfile
+    command: sh -c "sleep 5 && alembic upgrade head"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://greenai:greenai@postgres:5432/greenai
+    depends_on:
+      - postgres
+
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    command: python worker.py
+    environment:
+      DATABASE_URL: postgresql+psycopg2://greenai:greenai@postgres:5432/greenai
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./backend:/code/backend
+    depends_on:
+      - api
+      - redis
+
+  frontend:
+    build:
+      context: .
+      dockerfile: services/frontend/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  nginx:
+    build:
+      context: .
+      dockerfile: services/nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+      - frontend
+
+  sdk:
+    build:
+      context: .
+      dockerfile: services/sdk/Dockerfile
+    command: python -c "import greenai_sdk; print('greenai-sdk ready')"
+
+  cli:
+    build:
+      context: .
+      dockerfile: services/cli/Dockerfile
+    entrypoint: ["greenai-cli"]
+
+volumes:
+  db_data:
+  storage_data:
