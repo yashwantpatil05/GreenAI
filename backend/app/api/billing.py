@@ -35,6 +35,7 @@ class VerifyPaymentRequest(BaseModel):
     plan_id: str
 
 
+@router.get("/plans/")
 @router.get("/plans")
 def list_plans():
     """Get all available subscription plans."""
@@ -50,6 +51,7 @@ def get_plan_details(plan_id: str):
     return plan
 
 
+@router.post("/create-order/")
 @router.post("/create-order")
 def create_payment_order(
     payload: CreateOrderRequest,
@@ -71,6 +73,7 @@ def create_payment_order(
         raise HTTPException(status_code=500, detail="Payment service error")
 
 
+@router.post("/verify-payment/")
 @router.post("/verify-payment")
 def verify_and_activate(
     payload: VerifyPaymentRequest,
