@@ -81,14 +81,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Email/Password Signup Flow"
-    - "Email/Password Login Flow"
     - "Project Creation Flow"
-    - "Logout Functionality"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Project Creation Flow"
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
     message: "Starting comprehensive testing of GreenAI authentication and project creation flows. Will test signup, login, project creation, logout, and OAuth integration."
+  - agent: "testing"
+    message: "TESTING COMPLETE: ✅ Signup, Login, Logout, and Google OAuth all working correctly. ❌ CRITICAL ISSUE: Project creation has 'Failed to fetch' errors and inconsistent project listing. Backend shows 307 redirects for /api/projects. This needs immediate investigation - likely API routing or authentication issue."
