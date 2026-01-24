@@ -20,12 +20,11 @@ from backend.app.auth.context import get_request_context
 router = APIRouter()
 
 
-@router.post("/", response_model=ProjectRead)
-def create_project_endpoint(
+def _create_project_logic(
     payload: ProjectCreate,
-    db: Session = Depends(get_db),
-    user=Depends(require_roles("owner", "admin")),
-    ctx=Depends(get_request_context),
+    db: Session,
+    user,
+    ctx,
 ):
     """Create a project for the current organization."""
     project = create_project(db, user.organization_id, payload)
@@ -44,12 +43,30 @@ def create_project_endpoint(
     return project
 
 
+def _list_projects_logic(db: Session, user):
+    """List projects for the organization."""
+    return list_projects(db, user.organization_id)
+
+
+@router.post("/", response_model=ProjectRead)
+@router.post("", response_model=ProjectRead)
+def create_project_endpoint(
+    payload: ProjectCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("owner", "admin")),
+    ctx=Depends(get_request_context),
+):
+    """Create a project for the current organization."""
+    return _create_project_logic(payload, db, user, ctx)
+
+
 @router.get("/", response_model=list[ProjectRead])
+@router.get("", response_model=list[ProjectRead])
 def list_project_endpoint(
     db: Session = Depends(get_db), user=Depends(get_current_user)
 ):
     """List projects for the organization."""
-    return list_projects(db, user.organization_id)
+    return _list_projects_logic(db, user)
 
 
 @router.post("/api-keys", response_model=ApiKeyRead)
