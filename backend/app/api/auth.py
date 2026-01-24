@@ -372,37 +372,22 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 
 @router.post("/oauth-exchange", response_model=Token)
-def oauth_exchange(db: Session = Depends(get_db), ctx=Depends(get_request_context)):
+def oauth_exchange(
+    authorization: str = Depends(lambda request: request.headers.get("Authorization", "")),
+    db: Session = Depends(get_db),
+    ctx=Depends(get_request_context)
+):
     """
     Exchange a Supabase OAuth session token for our internal JWT.
     Frontend should send: Authorization: Bearer <supabase_access_token>
     """
-    from fastapi import Header
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or invalid Authorization header. Expected: Bearer <token>"
+        )
     
-    async def get_supabase_token(authorization: str = Header(None)) -> str:
-        if not authorization:
-            raise HTTPException(status_code=401, detail="Missing authorization header")
-        if not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Invalid authorization format")
-        return authorization.replace("Bearer ", "")
-    
-    # Get the token from the header
-    import inspect
-    frame = inspect.currentframe()
-    try:
-        if frame and frame.f_back:
-            request = frame.f_back.f_locals.get('request')
-            if request:
-                auth_header = request.headers.get('Authorization', '')
-                if not auth_header.startswith('Bearer '):
-                    raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-                supabase_token = auth_header.replace('Bearer ', '')
-            else:
-                raise HTTPException(status_code=401, detail="Could not extract token")
-        else:
-            raise HTTPException(status_code=401, detail="Could not extract token")
-    finally:
-        del frame
+    supabase_token = authorization.replace("Bearer ", "", 1)
     
     try:
         # Verify the Supabase token and get user info
