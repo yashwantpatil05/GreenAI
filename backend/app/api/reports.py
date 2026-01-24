@@ -19,6 +19,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=list[ReportRead])
+@router.get("", response_model=list[ReportRead])
 def list_reports(db: Session = Depends(get_db), user=Depends(get_current_user)):
     """List reports for organization."""
     return (

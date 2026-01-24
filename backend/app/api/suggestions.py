@@ -21,6 +21,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=list[SuggestionRead])
+@router.get("", response_model=list[SuggestionRead])
 def list_suggestions(db: Session = Depends(get_db), user=Depends(get_current_user)):
     """List suggestions for organization."""
     return (
