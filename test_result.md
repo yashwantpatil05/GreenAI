@@ -33,7 +33,7 @@ frontend:
     implemented: true
     working: false
     file: "/app/frontend/app/projects/page.tsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -43,6 +43,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "❌ CRITICAL: Project creation has issues. 'Failed to fetch' error appears on projects page. Backend logs show 307 redirects for /api/projects requests. Project creation form submits but projects don't appear in list consistently. API integration needs investigation."
+      - working: false
+        agent: "testing"
+        comment: "❌ ROOT CAUSE IDENTIFIED: The 'Failed to fetch' error is caused by 307 redirects from /api/projects to /api/projects/. Backend logs show: 'GET /api/projects HTTP/1.1 307 Temporary Redirect' followed by 'GET /api/projects/ HTTP/1.1 200 OK'. The frontend calls /api/projects (no trailing slash) but FastAPI redirects to /api/projects/ (with trailing slash). This redirect breaks the fetch() call in the browser, causing the error. Additionally, authentication flow has issues - signup works but users aren't properly authenticated afterward, showing 'You're not signed in' on projects page."
 
   - task: "Logout Functionality"
     implemented: true
