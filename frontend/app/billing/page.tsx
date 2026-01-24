@@ -199,8 +199,8 @@ export default function BillingPage() {
       setError(null);
       try {
         const [plansRes, usageRes] = await Promise.all([
-          apiFetch<{ plans: Plan[] }>("/billing/plans", {}, { token }),
-          apiFetch<Usage>("/billing/usage", {}, { token }),
+          apiFetch<{ plans: Plan[] }>("/billing/plans", {}, { token: token || undefined }),
+          apiFetch<Usage>("/billing/usage", {}, { token: token || undefined }),
         ]);
         setPlans(plansRes.plans || []);
         setUsage(usageRes);
