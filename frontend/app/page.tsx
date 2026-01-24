@@ -510,31 +510,31 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Carbon Emissions"
-          value={stats.total_carbon_kg.toFixed(1)}
+          value={(stats?.total_carbon_kg ?? 0).toFixed(1)}
           unit="kg CO₂e"
-          trend={stats.carbon_trend}
+          trend={stats?.carbon_trend}
           trendLabel="vs last month"
           icon={Leaf}
           color="emerald"
         />
         <StatCard
           title="Energy Consumed"
-          value={stats.total_energy_kwh.toFixed(1)}
+          value={(stats?.total_energy_kwh ?? 0).toFixed(1)}
           unit="kWh"
-          trend={stats.energy_trend}
+          trend={stats?.energy_trend}
           icon={Zap}
           color="teal"
         />
         <StatCard
           title="Carbon Saved"
-          value={stats.carbon_saved_kg.toFixed(1)}
+          value={(stats?.carbon_saved_kg ?? 0).toFixed(1)}
           unit="kg CO₂e"
           icon={Target}
           color="cyan"
         />
         <StatCard
           title="Total Job Runs"
-          value={stats.total_runs}
+          value={stats?.total_runs ?? 0}
           icon={Activity}
           color="amber"
         />
