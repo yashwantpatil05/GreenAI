@@ -130,7 +130,7 @@ export default function ApiKeysPage() {
     try {
       const payload = { name, scopes: newScopes, project_id: newProjectId };
       const created = await apiFetch<ApiKey>(
-        "/api/projects/api-keys",
+        "/projects/api-keys",
         { method: "POST", body: JSON.stringify(payload) },
         { token }
       );
@@ -153,7 +153,7 @@ export default function ApiKeysPage() {
     if (!token) return;
     setErr(null);
     try {
-      const updated = await apiFetch<ApiKey>(`/api/projects/api-keys/${id}/revoke`, { method: "POST" }, { token });
+      const updated = await apiFetch<ApiKey>(`/projects/api-keys/${id}/revoke`, { method: "POST" }, { token });
       setKeys((prev) => prev.map((k) => (k.id === id ? { ...k, ...updated } : k)));
     } catch (e: any) {
       setErr(e?.message || "Failed to revoke API key");
