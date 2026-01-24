@@ -1,8 +1,8 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/api-keys/page": "app/api-keys/page.js",
-  "/auth/callback/page": "app/auth/callback/page.js",
   "/audit-logs/page": "app/audit-logs/page.js",
+  "/auth/callback/page": "app/auth/callback/page.js",
   "/billing/page": "app/billing/page.js",
   "/compare/page": "app/compare/page.js",
   "/docs/page": "app/docs/page.js",
