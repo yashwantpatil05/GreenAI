@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     # Dev seed
     enable_dev_seed: bool = Field(default=False, alias="ENABLE_DEV_SEED")
 
+    # Razorpay
+    razorpay_key_id: str = Field(default="", alias="RAZORPAY_KEY_ID")
+    razorpay_key_secret: SecretStr = Field(default=SecretStr(""), alias="RAZORPAY_KEY_SECRET")
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
