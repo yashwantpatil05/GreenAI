@@ -94,21 +94,21 @@ export default function ProjectsPage() {
 
       <form
         onSubmit={onCreate}
-        className="card flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 md:flex-row md:items-end"
+        className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm md:flex-row md:items-end"
       >
         <div className="flex-1">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Name</label>
+          <label className="text-xs font-medium text-muted-foreground">Name</label>
           <input
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            className="mt-1 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm text-foreground"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
             required
           />
         </div>
         <div className="flex-1">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Description</label>
+          <label className="text-xs font-medium text-muted-foreground">Description</label>
           <input
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+            className="mt-1 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm text-foreground"
             value={form.description}
             onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
           />
@@ -116,7 +116,7 @@ export default function ProjectsPage() {
         <button
           type="submit"
           disabled={creating}
-          className="h-10 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-50"
+          className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
           {creating ? "Creating…" : "Create project"}
         </button>
