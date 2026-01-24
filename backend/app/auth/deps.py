@@ -22,7 +22,6 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 
 from backend.app.auth.security import decode_internal_token, decode_supabase_jwt
-from backend.app.core.database import SessionLocal
 from backend.app.models.organization_member import OrganizationMember
 
 
