@@ -6,6 +6,7 @@ import { FormEvent, useState } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { Logo } from "../../components/Logo";
+import { signInWithGoogle, signInWithGithub } from "../../lib/supabase";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(null);
   const [success, setSuccess] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
@@ -26,6 +28,28 @@ export default function LoginPage() {
       setError(err?.message || "Login failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setSocialLoading("google");
+    setError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(err?.message || "Google sign in failed");
+      setSocialLoading(null);
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    setSocialLoading("github");
+    setError(null);
+    try {
+      await signInWithGithub();
+    } catch (err: any) {
+      setError(err?.message || "GitHub sign in failed");
+      setSocialLoading(null);
     }
   };
 
