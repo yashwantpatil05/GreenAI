@@ -191,6 +191,7 @@ def ingest_job_run(
 
 
 @router.get("/", response_model=list[JobRunRead])
+@router.get("", response_model=list[JobRunRead])
 def list_runs(
     project_id: UUID | None = None,
     start: datetime | None = None,
