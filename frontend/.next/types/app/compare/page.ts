@@ -1,4 +1,4 @@
-// File: D:\MyWork\GreenAI\frontend\app\compare\page.tsx
+// File: /app/frontend/app/compare/page.tsx
 import * as entry from '../../../../app/compare/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

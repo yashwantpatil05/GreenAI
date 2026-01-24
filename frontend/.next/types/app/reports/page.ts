@@ -1,4 +1,4 @@
-// File: D:\MyWork\GreenAI\frontend\app\reports\page.tsx
+// File: /app/frontend/app/reports/page.tsx
 import * as entry from '../../../../app/reports/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
