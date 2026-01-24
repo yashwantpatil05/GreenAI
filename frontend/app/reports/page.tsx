@@ -49,15 +49,15 @@ function StatusPill({ value }: { value: string }) {
   const v = (value || "").toLowerCase();
   const base = "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset";
   if (v.includes("complete") || v.includes("success") || v.includes("ready")) {
-    return <span className={`${base} bg-emerald-50 text-emerald-700 ring-emerald-200`}>{value}</span>;
+    return <span className={`${base} bg-emerald-500/10 text-emerald-500 ring-emerald-500/30`}>{value}</span>;
   }
   if (v.includes("fail") || v.includes("error")) {
-    return <span className={`${base} bg-rose-50 text-rose-700 ring-rose-200`}>{value}</span>;
+    return <span className={`${base} bg-destructive/10 text-destructive ring-destructive/30`}>{value}</span>;
   }
   if (v.includes("run") || v.includes("progress") || v.includes("pending")) {
-    return <span className={`${base} bg-amber-50 text-amber-700 ring-amber-200`}>{value}</span>;
+    return <span className={`${base} bg-amber-500/10 text-amber-500 ring-amber-500/30`}>{value}</span>;
   }
-  return <span className={`${base} bg-slate-50 text-slate-700 ring-slate-200`}>{value}</span>;
+  return <span className={`${base} bg-muted text-muted-foreground ring-border`}>{value}</span>;
 }
 
 export default function ReportsPage() {
