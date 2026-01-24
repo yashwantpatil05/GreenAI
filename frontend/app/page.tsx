@@ -224,7 +224,7 @@ export default function DashboardPage() {
         ) : (
           <div className="w-full overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="border-b border-white/10 text-xs uppercase tracking-wide text-white/60">
+              <thead className="border-b border-border/60 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="py-2 pr-4 text-left">Name</th>
                   <th className="py-2 pr-4 text-left">Type</th>
@@ -234,14 +234,14 @@ export default function DashboardPage() {
                   <th className="py-2 pr-0 text-left">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border/40">
                 {topRuns.map((r) => {
                   const m = toRunMetrics(r);
                   return (
-                    <tr key={r.id}>
+                    <tr key={r.id} className="text-foreground">
                       <td className="py-3 pr-4">{r.run_name || r.id}</td>
-                      <td className="py-3 pr-4 text-white/70">{r.job_type || "-"}</td>
-                      <td className="py-3 pr-4 text-white/70">
+                      <td className="py-3 pr-4 text-muted-foreground">{r.job_type || "-"}</td>
+                      <td className="py-3 pr-4 text-muted-foreground">
                         {new Date(r.updated_at || r.created_at || r.end_time || r.start_time || 0).toLocaleString()}
                       </td>
                       <td className="py-3 pr-4">{fmtNum(m.energy, 3)} kWh</td>
