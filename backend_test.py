@@ -172,6 +172,41 @@ class GreenAIAPITester:
             self.log_test("API Root Accessibility", False, f"Request failed: {str(e)}")
             return False
 
+    def test_billing_plans_endpoint(self) -> bool:
+        """Test GET /api/billing/plans endpoint (should return 3 plans)"""
+        try:
+            response = self.session.get(f"{self.base_url}/billing/plans", timeout=10)
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    plans = data.get("plans", [])
+                    
+                    if len(plans) == 3:
+                        plan_names = [plan.get("name") for plan in plans]
+                        expected_plans = ["Starter", "Pro", "Enterprise"]
+                        
+                        if all(name in plan_names for name in expected_plans):
+                            self.log_test("Billing Plans Endpoint", True, f"Found 3 plans: {plan_names}")
+                            return True
+                        else:
+                            self.log_test("Billing Plans Endpoint", False, f"Expected plans {expected_plans}, got {plan_names}")
+                            return False
+                    else:
+                        self.log_test("Billing Plans Endpoint", False, f"Expected 3 plans, got {len(plans)}")
+                        return False
+                        
+                except json.JSONDecodeError:
+                    self.log_test("Billing Plans Endpoint", False, f"Invalid JSON response: {response.text}")
+                    return False
+            else:
+                self.log_test("Billing Plans Endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("Billing Plans Endpoint", False, f"Request failed: {str(e)}")
+            return False
+
     def test_projects_endpoint_without_auth(self) -> bool:
         """Test projects endpoint without authentication (should return 401/403)"""
         try:
