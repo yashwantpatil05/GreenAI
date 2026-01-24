@@ -14,53 +14,53 @@
 @layer base {
   :root,
   html.light {
-    /* Core */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* Core - Subtle green tint for light theme */
+    --background: 150 20% 98%;
+    --foreground: 160 30% 10%;
 
     /* Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 160 30% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 160 30% 10%;
 
     /* Brand (Eco green) */
-    --primary: 142 72% 31%;
+    --primary: 158 64% 40%;
     --primary-foreground: 0 0% 100%;
 
     /* UI */
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 150 25% 95%;
+    --secondary-foreground: 160 30% 10%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 46%;
+    --muted: 150 20% 94%;
+    --muted-foreground: 160 15% 40%;
 
-    --accent: 154 45% 95%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 154 35% 92%;
+    --accent-foreground: 160 30% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders / Inputs / Rings */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 142 72% 33%;
+    --border: 155 20% 88%;
+    --input: 155 20% 88%;
+    --ring: 158 64% 40%;
 
     /* Radius */
     --radius: 1rem;
 
     /* Chart palette */
-    --chart-1: 142 72% 33%;
-    --chart-2: 199 90% 48%;
+    --chart-1: 158 64% 40%;
+    --chart-2: 172 66% 50%;
     --chart-3: 40 95% 55%;
     --chart-4: 262 83% 58%;
     --chart-5: 0 84% 60%;
 
     /* Decorative aurora */
-    --gai-aurora-1: 142 72% 33%;
-    --gai-aurora-2: 199 90% 48%;
-    --gai-aurora-3: 40 95% 55%;
+    --gai-aurora-1: 158 64% 40%;
+    --gai-aurora-2: 172 66% 50%;
+    --gai-aurora-3: 187 72% 55%;
   }
 
   html.dark {
