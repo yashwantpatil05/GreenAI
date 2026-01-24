@@ -10,7 +10,7 @@ from backend.app.middleware.logging import logging_middleware
 
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name)
+app = FastAPI(title=settings.app_name, redirect_slashes=False)
 
 app.add_middleware(
     CORSMiddleware,
