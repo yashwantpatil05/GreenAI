@@ -596,7 +596,7 @@ export default function DashboardPage() {
         <LeaderboardCard projects={topProjects} />
         
         {/* Industry Comparison */}
-        <IndustryComparison percentage={stats?.industry_comparison} />
+        <IndustryComparison percentage={stats?.industry_comparison ?? 0} />
       </div>
 
       {/* Third Row */}
