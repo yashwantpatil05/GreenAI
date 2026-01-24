@@ -250,11 +250,11 @@ export default function JobRunsPage() {
               {loading ? "Loading…" : `${filtered.length} shown`}
             </span>
           </div>
-          {err ? <div className="text-xs text-rose-600 dark:text-rose-400">{err}</div> : null}
+          {err ? <div className="text-xs text-destructive">{err}</div> : null}
         </div>
 
         {loading ? (
-          <div className="p-6 text-sm text-zinc-600 dark:text-zinc-400">Loading job runs…</div>
+          <div className="p-6 text-sm text-muted-foreground">Loading job runs…</div>
         ) : filtered.length === 0 ? (
           <div className="p-10">
             <EmptyState title="No runs found" description="Try changing filters or ingest a run via SDK/API key." />
@@ -262,7 +262,7 @@ export default function JobRunsPage() {
         ) : (
           <div className="w-full overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="bg-zinc-50 text-xs text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400">
+              <thead className="bg-muted/25 text-xs text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-medium">Run</th>
                   <th className="px-4 py-3 font-medium">Type</th>
@@ -274,22 +274,22 @@ export default function JobRunsPage() {
                   <th className="px-4 py-3 font-medium">Carbon (kg)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-border/60">
                 {filtered.map((r) => (
                   <tr
                     key={r.id}
-                    className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/30"
+                    className="cursor-pointer hover:bg-accent/40 transition"
                     onClick={() => {
                       setSelectedId(r.id);
                       setOpen(true);
                     }}
                   >
                     <td className="px-4 py-3">
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100">{r.run_name}</div>
-                      <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{r.id}</div>
+                      <div className="font-medium text-foreground">{r.run_name}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">{r.id}</div>
                     </td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{r.job_type}</td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{r.region}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{r.job_type}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{r.region}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ${statusTone(r.status)}`}
@@ -297,10 +297,10 @@ export default function JobRunsPage() {
                         {r.status || "unknown"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{fmtDT(r.start_time)}</td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{fmtDT(r.end_time)}</td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{fmtNum(r.energy_kwh, 6)}</td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{fmtNum(r.carbon_kg_co2e, 6)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{fmtDT(r.start_time)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{fmtDT(r.end_time)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{fmtNum(r.energy_kwh, 6)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{fmtNum(r.carbon_kg_co2e, 6)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -311,11 +311,11 @@ export default function JobRunsPage() {
 
       <Drawer open={open} onClose={() => setOpen(false)} title="Run details">
         {!selectedId ? null : detailLoading ? (
-          <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">Loading…</div>
+          <div className="p-4 text-sm text-muted-foreground">Loading…</div>
         ) : detailErr ? (
-          <div className="p-4 text-sm text-rose-600 dark:text-rose-400">{detailErr}</div>
+          <div className="p-4 text-sm text-destructive">{detailErr}</div>
         ) : !detail ? (
-          <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">No details.</div>
+          <div className="p-4 text-sm text-muted-foreground">No details.</div>
         ) : (
           <div className="space-y-4 p-4">
             <div>
