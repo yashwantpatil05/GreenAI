@@ -24,17 +24,36 @@ export default function AuthCallbackPage() {
         if (error) throw error;
         
         if (session) {
+          setMessage("Exchanging token with backend...");
+          
+          // Exchange Supabase token for our internal JWT
+          const apiBase = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api";
+          const response = await fetch(`${apiBase}/auth/oauth-exchange`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${session.access_token}`,
+              "Content-Type": "application/json",
+            },
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Failed to exchange token");
+          }
+          
+          const data = await response.json();
+          
+          // Store our internal JWT token
+          if (typeof window !== "undefined") {
+            localStorage.setItem("greenai_token", data.access_token);
+          }
+          
           setStatus("success");
           setMessage("Authentication successful! Redirecting...");
           
-          // Store the token for our API calls
-          if (typeof window !== "undefined") {
-            localStorage.setItem("greenai_token", session.access_token);
-          }
-          
-          // Redirect to dashboard after a short delay
+          // Redirect to projects page after a short delay
           setTimeout(() => {
-            router.push("/");
+            router.push("/projects");
           }, 1500);
         } else {
           throw new Error("No session found");
