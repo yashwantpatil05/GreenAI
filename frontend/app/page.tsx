@@ -194,10 +194,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-border/60 bg-card p-4">
           <div className="mb-3">
-            <div className="text-sm font-medium text-white">Energy by job type</div>
-            <div className="text-xs text-white/60">Top workloads</div>
+            <div className="text-sm font-medium text-foreground">Energy by job type</div>
+            <div className="text-xs text-muted-foreground">Top workloads</div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -213,10 +213,10 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-2xl border border-border/60 bg-card p-4">
         <div className="mb-3">
-          <div className="text-sm font-medium text-white">Recent runs</div>
-          <div className="text-xs text-white/60">Latest ingested jobs</div>
+          <div className="text-sm font-medium text-foreground">Recent runs</div>
+          <div className="text-xs text-muted-foreground">Latest ingested jobs</div>
         </div>
 
         {topRuns.length === 0 ? (
