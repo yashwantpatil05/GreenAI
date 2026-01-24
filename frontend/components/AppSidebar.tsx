@@ -81,21 +81,11 @@ export default function AppSidebar({
         {/* Header */}
         <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-3">
           <Link href="/" className="flex items-center gap-2 overflow-hidden">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-card shadow-sm">
-              <span className="text-sm font-bold">GA</span>
-            </div>
-
-            <div
-              className={cn(
-                "min-w-0 transition-all duration-200",
-                !mobile && collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
-              )}
-            >
-              <div className="truncate text-sm font-semibold leading-tight">GreenAI</div>
-              <div className="truncate text-xs text-muted-foreground leading-tight">
-                Carbon-aware ML ops
-              </div>
-            </div>
+            {!mobile && collapsed ? (
+              <LogoMark size={36} className="shrink-0" />
+            ) : (
+              <Logo size="sm" showText={!collapsed} animated={false} />
+            )}
           </Link>
 
           <div className="flex items-center gap-1">
@@ -103,7 +93,7 @@ export default function AppSidebar({
               <button
                 type="button"
                 onClick={() => onMobileClose?.()}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background hover:bg-accent"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background hover:bg-accent transition-colors"
                 aria-label="Close sidebar"
               >
                 <X className="h-4 w-4" />
@@ -112,7 +102,7 @@ export default function AppSidebar({
               <button
                 type="button"
                 onClick={() => onToggleCollapsed?.()}
-                className="hidden h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background hover:bg-accent md:inline-flex"
+                className="hidden h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background hover:bg-accent md:inline-flex transition-colors"
                 aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                 title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
