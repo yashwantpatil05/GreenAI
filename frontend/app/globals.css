@@ -64,37 +64,37 @@
   }
 
   html.dark {
-    /* Core */
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
+    /* Core - Greenish dark theme to match login aurora */
+    --background: 160 30% 5%;
+    --foreground: 150 20% 95%;
 
     /* Surfaces */
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
+    --card: 160 25% 8%;
+    --card-foreground: 150 20% 95%;
 
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 160 25% 8%;
+    --popover-foreground: 150 20% 95%;
 
-    /* Brand */
-    --primary: 142 72% 42%;
-    --primary-foreground: 222 47% 7%;
+    /* Brand - Emerald/Teal */
+    --primary: 158 64% 45%;
+    --primary-foreground: 160 30% 5%;
 
     /* UI */
-    --secondary: 217 33% 14%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 160 20% 12%;
+    --secondary-foreground: 150 20% 95%;
 
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 160 15% 14%;
+    --muted-foreground: 155 15% 55%;
 
-    --accent: 217 33% 14%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 160 20% 14%;
+    --accent-foreground: 150 20% 95%;
 
     --destructive: 0 63% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 142 72% 44%;
+    --border: 160 15% 18%;
+    --input: 160 15% 18%;
+    --ring: 158 64% 45%;
 
     --radius: 1rem;
 
