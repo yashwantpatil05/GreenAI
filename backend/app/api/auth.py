@@ -369,3 +369,117 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         db.rollback()
         logger.exception("Login failed")
         raise
+
+
+@router.post("/oauth-exchange", response_model=Token)
+def oauth_exchange(db: Session = Depends(get_db), ctx=Depends(get_request_context)):
+    """
+    Exchange a Supabase OAuth session token for our internal JWT.
+    Frontend should send: Authorization: Bearer <supabase_access_token>
+    """
+    from fastapi import Header
+    
+    async def get_supabase_token(authorization: str = Header(None)) -> str:
+        if not authorization:
+            raise HTTPException(status_code=401, detail="Missing authorization header")
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid authorization format")
+        return authorization.replace("Bearer ", "")
+    
+    # Get the token from the header
+    import inspect
+    frame = inspect.currentframe()
+    try:
+        if frame and frame.f_back:
+            request = frame.f_back.f_locals.get('request')
+            if request:
+                auth_header = request.headers.get('Authorization', '')
+                if not auth_header.startswith('Bearer '):
+                    raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+                supabase_token = auth_header.replace('Bearer ', '')
+            else:
+                raise HTTPException(status_code=401, detail="Could not extract token")
+        else:
+            raise HTTPException(status_code=401, detail="Could not extract token")
+    finally:
+        del frame
+    
+    try:
+        # Verify the Supabase token and get user info
+        base = _supabase_url()
+        service_key = _supabase_service_key()
+        
+        # Use Supabase Admin API to get user from access token
+        with httpx.Client(timeout=20.0) as client:
+            r = client.get(
+                f"{base}/auth/v1/user",
+                headers={
+                    "apikey": service_key,
+                    "Authorization": f"Bearer {supabase_token}",
+                }
+            )
+        
+        if r.status_code != 200:
+            raise HTTPException(status_code=401, detail="Invalid or expired Supabase token")
+        
+        user_data = r.json()
+        user_id = UUID(user_data.get("id"))
+        email = user_data.get("email")
+        
+        if not user_id or not email:
+            raise HTTPException(status_code=401, detail="Invalid user data from Supabase")
+        
+        # Check if user exists in our database
+        user = db.query(User).filter(User.id == user_id).first()
+        
+        if not user:
+            # Auto-provision user from OAuth login
+            # Use email domain or email as org name
+            org_name = email.split('@')[0] + "'s Organization"
+            org = _get_or_create_org(db, org_name)
+            user = _upsert_user_for_supabase(db, user_id, email, org.id, role="owner")
+            _ensure_owner_membership(db, org.id, user_id, role="owner")
+            db.flush()
+        
+        # Get user's organization membership
+        membership = (
+            db.query(OrganizationMember)
+            .filter(OrganizationMember.user_id == user_id)
+            .order_by(OrganizationMember.created_at.asc())
+            .first()
+        )
+        
+        if not membership:
+            raise HTTPException(status_code=403, detail="User has no organization membership")
+        
+        # Issue our internal JWT
+        token = _issue_internal_token(
+            user_id,
+            membership.organization_id,
+            membership.role or user.role or "member",
+            email,
+        )
+        
+        audit_log(
+            AuditEvent(
+                organization_id=membership.organization_id,
+                actor_type="user",
+                actor_user_id=user_id,
+                action="auth.oauth_login",
+                status="success",
+                request_id=ctx.request_id,
+                metadata={"email": email, "provider": "oauth"},
+            ),
+            db,
+        )
+        
+        db.commit()
+        return Token(access_token=token)
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.exception("OAuth exchange failed")
+        raise HTTPException(status_code=500, detail=f"OAuth exchange failed: {str(e)}")
