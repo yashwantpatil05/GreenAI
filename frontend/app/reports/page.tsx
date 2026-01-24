@@ -138,8 +138,8 @@ export default function ReportsPage() {
         header: "Report",
         cell: (row: Report) => (
           <div className="flex flex-col">
-            <span className="font-medium text-slate-900">{row.name}</span>
-            <span className="text-xs text-slate-500">Period: {row.period}</span>
+            <span className="font-medium text-foreground">{row.name}</span>
+            <span className="text-xs text-muted-foreground">Period: {row.period}</span>
           </div>
         ),
       },
@@ -147,7 +147,7 @@ export default function ReportsPage() {
         key: "project",
         header: "Project",
         cell: (row: Report) => (
-          <div className="text-sm text-slate-700">
+          <div className="text-sm text-muted-foreground">
             {projectMap.get(row.project_id)?.name ?? row.project_id}
           </div>
         ),
@@ -160,7 +160,7 @@ export default function ReportsPage() {
       {
         key: "created_at",
         header: "Created",
-        cell: (row: Report) => <span className="text-sm text-slate-600">{fmt(row.created_at)}</span>,
+        cell: (row: Report) => <span className="text-sm text-muted-foreground">{fmt(row.created_at)}</span>,
       },
       {
         key: "actions",
@@ -175,7 +175,7 @@ export default function ReportsPage() {
                   href={href}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
                 >
                   Open
                 </a>
@@ -189,7 +189,7 @@ export default function ReportsPage() {
                       await navigator.clipboard.writeText(v);
                     } catch {}
                   }}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-lg border border-border/60 bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50"
                   disabled={!href}
                   title={href ? "Copy storage path" : "No path available"}
                 >
