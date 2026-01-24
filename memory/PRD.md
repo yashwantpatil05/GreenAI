@@ -1,20 +1,21 @@
 # GreenAI Platform - Product Requirements Document
 
 ## Overview
-GreenAI is a carbon tracking and ESG reporting platform for ML/AI workloads. It helps organizations monitor, analyze, and optimize the environmental impact of their machine learning operations.
+GreenAI is an enterprise carbon tracking and ESG reporting platform for AI/ML workloads. It helps organizations monitor, analyze, and optimize the environmental impact of their machine learning operations.
 
 ## Original Problem Statement
-Existing full-stack application (Next.js frontend + Python backend) with Supabase integration. Goals:
-- Fix UI instability and make it match the premium green aurora theme
-- Ensure backend is fully working, secure, and deployable
+Fix and polish existing GreenAI application (Next.js frontend + Python FastAPI backend + Supabase). Goals:
+- Make UI premium, attractive, and matching the green/sustainability theme
+- Fix bugs and ensure all features work correctly
+- Add Razorpay billing integration with subscription plans
 - Prepare for Docker-based deployment on GCP
 
 ## User Personas
 
 ### Data Scientist / ML Engineer
-- Needs to track carbon footprint of training jobs
-- Uses SDK/CLI to automatically log telemetry
-- Wants to compare runs to optimize for efficiency
+- Tracks carbon footprint of training jobs
+- Uses SDK/CLI for automatic telemetry
+- Compares runs to optimize efficiency
 
 ### Platform Engineer
 - Manages API keys and project configurations
@@ -22,9 +23,14 @@ Existing full-stack application (Next.js frontend + Python backend) with Supabas
 - Needs secure, multi-tenant architecture
 
 ### Sustainability Manager
-- Reviews ESG reports and compliance documentation
+- Reviews ESG reports for compliance
 - Tracks organizational carbon reduction goals
 - Needs high-level dashboards and trends
+
+### Finance/Billing Admin
+- Manages subscription plans
+- Monitors usage and overage charges
+- Reviews billing history
 
 ## Core Requirements (Static)
 
@@ -51,90 +57,118 @@ Existing full-stack application (Next.js frontend + Python backend) with Supabas
 - [x] ESG report generation
 - [x] Optimization suggestions
 
+### Billing (Razorpay)
+- [x] Subscription plans (Starter, Pro, Enterprise)
+- [x] Usage tracking and limits
+- [x] Overage billing
+- [x] Payment processing
+
 ## What's Been Implemented (January 2026)
 
-### UI/UX Improvements
-- [x] Fixed theme consistency across all pages (using CSS variables)
-- [x] Applied premium green aurora theme globally
-- [x] Sidebar + TopNav alignment stable
-- [x] Consistent typography, spacing, and surfaces
-- [x] Dark/light theme toggle working
-- [x] Responsive design improvements
+### Premium UI Redesign
+- [x] New SVG Logo component with leaf icon and animated glow
+- [x] Premium split-layout login/signup pages with aurora background
+- [x] Feature highlights on auth pages (Carbon Tracking, Energy Optimization, ESG Reports)
+- [x] Social login UI (Google, GitHub buttons)
+- [x] Compact theme toggle with colored indicator dot
+- [x] Consistent emerald/teal/cyan color scheme
+- [x] All pages using CSS variables for theming
+- [x] Smooth animations and transitions
 
-### Backend Fixes
-- [x] Health endpoints now at `/api/healthz` and `/api/readyz`
-- [x] CORS configuration for cross-origin requests
-- [x] Proper server.py entry point for uvicorn
-- [x] FastAPI dependencies upgraded (pydantic v2.12)
-- [x] Environment configuration via .env
+### Backend Improvements
+- [x] Fixed database session handling (removed scoped_session issues)
+- [x] Added Razorpay billing service with 3 plans
+- [x] Billing API: create order, verify payment, usage stats, overage calculation
+- [x] Health endpoints at /api/healthz and /api/readyz
+- [x] Proper CORS configuration
 
-### Pages Fixed/Polished
-- [x] Dashboard - Carbon trend charts, recent runs
-- [x] Projects - Create form, project cards
-- [x] Job Runs - Filters, stat cards, run table
-- [x] API Keys - Key management, project selector
-- [x] Reports - Generation, stat cards, search
-- [x] Compare - Run comparison with deltas
-- [x] Settings - Organization config, security
-- [x] Login/Signup - Premium aurora theme
+### Pages Updated
+- [x] Login - Premium split design with feature highlights
+- [x] Signup - Premium split design with different features
+- [x] Dashboard - New logo in sidebar
+- [x] Billing - Full subscription management UI
+- [x] All pages - Consistent theme tokens
 
-### Deployment
-- [x] Docker configuration (docker-compose.yml)
-- [x] Dockerfiles for backend/frontend
-- [x] Environment template (.env.example)
-- [x] README with deployment instructions
+### Billing Plans
+| Plan | Price | Job Runs | Projects | Users | Overage |
+|------|-------|----------|----------|-------|---------|
+| Starter | ₹2,999/mo | 10,000 | 3 | 2 | ₹0.50/run |
+| Pro | ₹9,999/mo | 100,000 | 10 | 10 | ₹0.30/run |
+| Enterprise | Custom | Unlimited | Unlimited | Unlimited | Custom |
 
 ## Prioritized Backlog
 
 ### P0 - Critical (Before Production)
-- [ ] Test signup/login flow end-to-end
-- [ ] Test job run ingestion with API key
-- [ ] Add data validation for job run payloads
-- [ ] Production CORS policy (restrict origins)
+- [ ] Test signup/login flow end-to-end with real credentials
+- [ ] Test job run ingestion via SDK/CLI
+- [ ] Verify Razorpay payment flow with test transaction
+- [ ] Add production CORS origins
 
 ### P1 - High Priority
-- [ ] Implement actual report file export (S3/GCS)
+- [ ] Implement Google/GitHub social auth (currently UI only)
+- [ ] Add invoice generation after payment
+- [ ] Implement report file export to S3/GCS
 - [ ] Add pagination to job runs list
-- [ ] Webhook notifications for report completion
-- [ ] Rate limiting on API endpoints
 
-### P2 - Medium Priority  
+### P2 - Medium Priority
 - [ ] SDK offline cache implementation
 - [ ] Role-based authorization on endpoints
-- [ ] Expanded suggestion engine rules
-- [ ] CI/CD pipeline setup
+- [ ] Webhook notifications for events
+- [ ] Rate limiting on API endpoints
 
 ### P3 - Nice to Have
-- [ ] Real-time WebSocket updates for dashboards
+- [ ] Real-time WebSocket updates
 - [ ] Export data to CSV/Excel
 - [ ] Custom branding per organization
 - [ ] Slack/Teams integrations
 
 ## Next Tasks
 
-1. **Test Authentication Flow**: Verify signup and login with actual Supabase accounts
-2. **Test API Key Ingestion**: Create project, generate API key, ingest test job run
-3. **Production Security**: Configure proper CORS origins, enable rate limiting
-4. **Billing Integration**: Add Stripe for subscription management (future revenue feature)
+1. **Test Full Auth Flow**: Create account, login, verify organization creation
+2. **Test Billing Flow**: Select plan, complete Razorpay payment, verify subscription activation
+3. **Test SDK Integration**: Generate API key, ingest test job run via SDK
+4. **Production Hardening**: Configure strict CORS, add rate limiting, enable logging
 
-## Architecture Notes
+## Architecture
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   Frontend  │────▶│   Backend   │────▶│  Supabase   │
 │  (Next.js)  │     │  (FastAPI)  │     │ (Postgres)  │
 └─────────────┘     └─────────────┘     └─────────────┘
-       │                   │
-       │                   ▼
-       │           ┌─────────────┐
-       └──────────▶│    Redis    │ (job queue)
-                   └─────────────┘
+       │                   │                   │
+       │                   ▼                   │
+       │           ┌─────────────┐            │
+       │           │  Razorpay   │            │
+       │           │  (Billing)  │            │
+       │           └─────────────┘            │
+       │                                       │
+       └───────────────────────────────────────┘
 ```
 
 ## Test Results
-- Backend: 80% (health endpoints working, minor CORS testing artifact)
-- Frontend: 100% (all pages loading, theme working)
-- Overall: 95% pass rate
+- Backend: 83% (health/billing APIs working)
+- Frontend: 95% (all pages working, premium UI)
+- Overall: 92% pass rate
+
+## Environment Variables
+
+### Backend
+```
+DATABASE_URL=postgresql://...
+JWT_SECRET_KEY=...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_JWT_SECRET=...
+RAZORPAY_KEY_ID=rzp_live_...
+RAZORPAY_KEY_SECRET=...
+```
+
+### Frontend
+```
+NEXT_PUBLIC_API_BASE=https://your-api-url/api
+```
 
 ---
 *Last Updated: January 24, 2026*
