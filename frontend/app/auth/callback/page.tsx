@@ -14,6 +14,10 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        if (!supabase) {
+          throw new Error("OAuth is not configured");
+        }
+        
         // Get the session from Supabase
         const { data: { session }, error } = await supabase.auth.getSession();
         
