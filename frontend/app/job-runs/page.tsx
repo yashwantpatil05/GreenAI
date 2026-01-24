@@ -175,11 +175,11 @@ export default function JobRunsPage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">Telemetry</div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <div className="text-sm text-muted-foreground">Telemetry</div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Job Runs
           </h1>
-          <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <div className="mt-1 text-sm text-muted-foreground">
             Filter, inspect, and audit ingested runs.
           </div>
         </div>
@@ -187,51 +187,51 @@ export default function JobRunsPage() {
         <div className="flex gap-2">
           <button
             onClick={loadList}
-            className="inline-flex items-center justify-center rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+            className="inline-flex items-center justify-center rounded-xl border border-border/60 bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent"
           >
             Refresh
           </button>
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Project ID</label>
+          <label className="text-xs font-medium text-muted-foreground">Project ID</label>
           <input
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
             placeholder="UUID"
-            className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            className="h-10 rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground outline-none ring-0 placeholder:text-muted-foreground focus:border-border"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Search</label>
+          <label className="text-xs font-medium text-muted-foreground">Search</label>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="run name, status, region…"
-            className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            className="h-10 rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground outline-none ring-0 placeholder:text-muted-foreground focus:border-border"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">From</label>
+          <label className="text-xs font-medium text-muted-foreground">From</label>
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+            className="h-10 rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground outline-none ring-0 focus:border-border"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400">To</label>
+          <label className="text-xs font-medium text-muted-foreground">To</label>
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="h-10 rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+            className="h-10 rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground outline-none ring-0 focus:border-border"
           />
         </div>
       </div>
@@ -242,11 +242,11 @@ export default function JobRunsPage() {
         <StatCard label="Carbon (kgCO₂e)" value={fmtNum(stats.carbon, 4)} />
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-sm">
+        <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+          <div className="text-sm font-medium text-foreground">
             Runs
-            <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
               {loading ? "Loading…" : `${filtered.length} shown`}
             </span>
           </div>
