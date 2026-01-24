@@ -111,6 +111,7 @@ def verify_and_activate(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get("/usage/")
 @router.get("/usage")
 def get_organization_usage(
     db: Session = Depends(get_db),
