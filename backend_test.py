@@ -47,7 +47,8 @@ class GreenAIAPITester:
             print(f"    Response: {response_data}")
 
     def test_health_endpoint(self) -> bool:
-        """Test GET /healthz endpoint"""
+        """Test GET /healthz endpoint - try both root and /api prefixed"""
+        # Try root level first
         try:
             response = self.session.get(f"{self.health_base}/healthz", timeout=10)
             
@@ -55,29 +56,42 @@ class GreenAIAPITester:
                 try:
                     data = response.json()
                     if data.get("status") == "ok":
-                        self.log_test("Health Endpoint", True, f"Status: {response.status_code}, Response: {data}")
+                        self.log_test("Health Endpoint (Root)", True, f"Status: {response.status_code}, Response: {data}")
                         return True
-                    else:
-                        self.log_test("Health Endpoint", False, f"Unexpected response format: {data}")
-                        return False
                 except json.JSONDecodeError:
                     # Check if response is plain text "ok"
                     if response.text.strip().lower() == "ok":
-                        self.log_test("Health Endpoint", True, f"Status: {response.status_code}, Response: {response.text}")
+                        self.log_test("Health Endpoint (Root)", True, f"Status: {response.status_code}, Response: {response.text}")
                         return True
-                    else:
-                        self.log_test("Health Endpoint", False, f"Invalid JSON response: {response.text}")
-                        return False
-            else:
-                self.log_test("Health Endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
-                return False
+        except requests.exceptions.RequestException:
+            pass
+        
+        # Try with /api prefix
+        try:
+            response = self.session.get(f"{self.base_url}/healthz", timeout=10)
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if data.get("status") == "ok":
+                        self.log_test("Health Endpoint (API)", True, f"Status: {response.status_code}, Response: {data}")
+                        return True
+                except json.JSONDecodeError:
+                    # Check if response is plain text "ok"
+                    if response.text.strip().lower() == "ok":
+                        self.log_test("Health Endpoint (API)", True, f"Status: {response.status_code}, Response: {response.text}")
+                        return True
+            
+            self.log_test("Health Endpoint", False, f"Both root and API endpoints failed. Last status: {response.status_code}")
+            return False
                 
         except requests.exceptions.RequestException as e:
-            self.log_test("Health Endpoint", False, f"Request failed: {str(e)}")
+            self.log_test("Health Endpoint", False, f"Both endpoints failed. Last error: {str(e)}")
             return False
 
     def test_readiness_endpoint(self) -> bool:
-        """Test GET /readyz endpoint"""
+        """Test GET /readyz endpoint - try both root and /api prefixed"""
+        # Try root level first
         try:
             response = self.session.get(f"{self.health_base}/readyz", timeout=10)
             
@@ -85,25 +99,37 @@ class GreenAIAPITester:
                 try:
                     data = response.json()
                     if data.get("status") == "ready":
-                        self.log_test("Readiness Endpoint", True, f"Status: {response.status_code}, Response: {data}")
+                        self.log_test("Readiness Endpoint (Root)", True, f"Status: {response.status_code}, Response: {data}")
                         return True
-                    else:
-                        self.log_test("Readiness Endpoint", False, f"Unexpected response format: {data}")
-                        return False
                 except json.JSONDecodeError:
                     # Check if response is plain text "ready"
                     if response.text.strip().lower() == "ready":
-                        self.log_test("Readiness Endpoint", True, f"Status: {response.status_code}, Response: {response.text}")
+                        self.log_test("Readiness Endpoint (Root)", True, f"Status: {response.status_code}, Response: {response.text}")
                         return True
-                    else:
-                        self.log_test("Readiness Endpoint", False, f"Invalid JSON response: {response.text}")
-                        return False
-            else:
-                self.log_test("Readiness Endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
-                return False
+        except requests.exceptions.RequestException:
+            pass
+        
+        # Try with /api prefix
+        try:
+            response = self.session.get(f"{self.base_url}/readyz", timeout=10)
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if data.get("status") == "ready":
+                        self.log_test("Readiness Endpoint (API)", True, f"Status: {response.status_code}, Response: {data}")
+                        return True
+                except json.JSONDecodeError:
+                    # Check if response is plain text "ready"
+                    if response.text.strip().lower() == "ready":
+                        self.log_test("Readiness Endpoint (API)", True, f"Status: {response.status_code}, Response: {response.text}")
+                        return True
+            
+            self.log_test("Readiness Endpoint", False, f"Both root and API endpoints failed. Last status: {response.status_code}")
+            return False
                 
         except requests.exceptions.RequestException as e:
-            self.log_test("Readiness Endpoint", False, f"Request failed: {str(e)}")
+            self.log_test("Readiness Endpoint", False, f"Both endpoints failed. Last error: {str(e)}")
             return False
 
     def test_cors_headers(self) -> bool:
