@@ -67,20 +67,20 @@ def _decode_claims(token: str):
 
 def _fetch_org_role(user_id: str) -> tuple[Optional[str], Optional[str]]:
     """Lookup a user's primary organization + role from memberships."""
-    session = SessionLocal()
-    try:
-        membership = (
-            session.query(OrganizationMember)
-            .filter(OrganizationMember.user_id == user_id)
-            .order_by(OrganizationMember.created_at.asc())
-            .first()
-        )
-        if membership:
-            return str(membership.organization_id), membership.role
-    except Exception:
-        logger.exception("Failed to fetch organization membership for %s", user_id)
-    finally:
-        SessionLocal.remove()
+    from backend.app.core.database import get_db_session
+    
+    with get_db_session() as session:
+        try:
+            membership = (
+                session.query(OrganizationMember)
+                .filter(OrganizationMember.user_id == user_id)
+                .order_by(OrganizationMember.created_at.asc())
+                .first()
+            )
+            if membership:
+                return str(membership.organization_id), membership.role
+        except Exception:
+            logger.exception("Failed to fetch organization membership for %s", user_id)
     return None, None
 
 
