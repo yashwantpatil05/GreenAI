@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  CreditCard,
+  Lightbulb,
 } from "lucide-react";
 
 import { cn } from "../lib/utils";
@@ -35,6 +37,8 @@ const navItems = [
   { href: "/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/compare", label: "Compare", icon: Scale },
+  { href: "/suggestions", label: "Suggestions", icon: Lightbulb },
+  { href: "/billing", label: "Billing", icon: CreditCard },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
