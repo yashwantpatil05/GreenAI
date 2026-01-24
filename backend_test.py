@@ -234,6 +234,7 @@ class GreenAIAPITester:
         # Run tests
         self.test_health_endpoint()
         self.test_readiness_endpoint()
+        self.test_billing_plans_endpoint()
         self.test_cors_headers()
         self.test_api_root_endpoint()
         self.test_projects_endpoint_without_auth()
