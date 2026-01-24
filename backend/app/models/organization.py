@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, text
+from sqlalchemy import DateTime, String, Integer, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -25,6 +25,17 @@ class Organization(Base):
 
     # Keep nullable to match existing DB state; validated by code during signup/bootstrap
     region_preference: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+    # Subscription fields
+    subscription_plan: Mapped[str | None] = mapped_column(String(50), nullable=True, default="starter")
+    subscription_status: Mapped[str | None] = mapped_column(String(50), nullable=True, default="trial")
+    subscription_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    razorpay_payment_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    
+    # Usage limits
+    job_runs_limit: Mapped[int | None] = mapped_column(Integer, nullable=True, default=10000)
+    projects_limit: Mapped[int | None] = mapped_column(Integer, nullable=True, default=3)
+    users_limit: Mapped[int | None] = mapped_column(Integer, nullable=True, default=2)
 
     created_at: Mapped[object] = mapped_column(
         DateTime(timezone=True),
