@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 class GreenAIAPITester:
-    def __init__(self, base_url: str = "https://1092e148-1b74-4537-8efa-bb9eebe81970.preview.emergentagent.com/api"):
+    def __init__(self, base_url: str = "https://greenai-fix.preview.emergentagent.com/api"):
         self.base_url = base_url.rstrip('/')
         self.health_base = base_url.replace('/api', '')  # Health endpoints are at root level
         self.session = requests.Session()
