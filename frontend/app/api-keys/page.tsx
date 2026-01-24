@@ -69,7 +69,7 @@ export default function ApiKeysPage() {
     if (!token) return;
     setProjectsLoading(true);
     try {
-      const data = await apiFetch<Project[]>("/api/projects/", { method: "GET" }, { token });
+      const data = await apiFetch<Project[]>("/projects/", { method: "GET" }, { token });
       setProjects(data || []);
       if (!newProjectId && data?.length) setNewProjectId(data[0].id);
     } catch (e: any) {
@@ -84,7 +84,7 @@ export default function ApiKeysPage() {
     setLoading(true);
     setErr(null);
     try {
-      const data = await apiFetch<ApiKey[]>("/api/projects/api-keys", { method: "GET" }, { token });
+      const data = await apiFetch<ApiKey[]>("/projects/api-keys", { method: "GET" }, { token });
       setKeys(data || []);
     } catch (e: any) {
       setErr(e?.message || "Failed to load API keys");
