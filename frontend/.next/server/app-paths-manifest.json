@@ -1,18 +1,18 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api-keys/page": "app/api-keys/page.js",
+  "/audit-logs/page": "app/audit-logs/page.js",
   "/compare/page": "app/compare/page.js",
   "/emissions/page": "app/emissions/page.js",
-  "/audit-logs/page": "app/audit-logs/page.js",
-  "/job-runs/page": "app/job-runs/page.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js",
-  "/projects/page": "app/projects/page.js",
-  "/reports/page": "app/reports/page.js",
-  "/signup/page": "app/signup/page.js",
+  "/api-keys/page": "app/api-keys/page.js",
   "/docs/page": "app/docs/page.js",
   "/job-runs/[id]/page": "app/job-runs/[id]/page.js",
-  "/suggestions/page": "app/suggestions/page.js",
+  "/login/page": "app/login/page.js",
+  "/job-runs/page": "app/job-runs/page.js",
+  "/projects/page": "app/projects/page.js",
+  "/reports/page": "app/reports/page.js",
   "/projects/[id]/page": "app/projects/[id]/page.js",
-  "/settings/page": "app/settings/page.js"
+  "/signup/page": "app/signup/page.js",
+  "/suggestions/page": "app/suggestions/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/page": "app/page.js"
 }
