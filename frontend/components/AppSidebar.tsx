@@ -20,13 +20,14 @@ import {
 } from "lucide-react";
 
 import { cn } from "../lib/utils";
+import { Logo, LogoMark } from "./Logo";
 
 type AppSidebarProps = {
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
 
   mobile?: boolean;
-  mobileOpen?: boolean; // controlled by AppShell; used only for close-on-nav
+  mobileOpen?: boolean;
   onMobileClose?: () => void;
 };
 
