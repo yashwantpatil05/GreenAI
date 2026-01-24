@@ -1,261 +1,587 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useEffect, useState, useMemo } from "react";
+import { 
+  TrendingDown, TrendingUp, Leaf, Zap, Target, Award, 
+  AlertTriangle, CheckCircle2, Clock, Activity, 
+  Globe, Building2, Users, BarChart3, ArrowRight,
+  Sparkles, Trophy, Flame
+} from "lucide-react";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, LineChart, Line
+} from "recharts";
+import Link from "next/link";
 
-import EmptyState from "../components/EmptyState";
-import RunStatusBadge from "../components/RunStatusBadge";
-import SectionHeader from "../components/SectionHeader";
-import StatCard from "../components/StatCard";
-import { useAuth } from "../hooks/useAuth";
-import { apiFetch } from "../lib/api";
+import { apiFetch } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+import EmptyState from "@/components/EmptyState";
 
-type Overview = {
-  total_runs?: number;
-  carbon_kg?: number;
-  energy_kwh?: number;
-  total_cost?: number;
-  avg_carbon_per_run?: number;
+// Types
+type DashboardStats = {
+  total_carbon_kg: number;
+  total_energy_kwh: number;
+  total_runs: number;
+  active_projects: number;
+  carbon_trend: number; // percentage change
+  energy_trend: number;
+  carbon_saved_kg: number;
+  efficiency_score: number; // 0-100
+  industry_comparison: number; // percentage better/worse than industry
 };
 
-type TrendPoint = {
+type CarbonTrendPoint = {
   date: string;
-  carbon_kg?: number;
-  energy_kwh?: number;
-  cost?: number;
+  carbon: number;
+  energy: number;
 };
 
-type Hotspot = {
-  job_type: string;
-  runs: number;
+type TopProject = {
+  id: string;
+  name: string;
   carbon_kg: number;
-  energy_kwh: number;
-  cost: number;
+  runs: number;
 };
 
-type JobRunAny = Record<string, any>;
+type RecentRun = {
+  id: string;
+  name: string;
+  project_name: string;
+  carbon_kg: number;
+  status: string;
+  created_at: string;
+};
 
-function fmtNum(v: number | null | undefined, digits = 0) {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return "-";
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: digits }).format(n);
+type CarbonBreakdown = {
+  category: string;
+  value: number;
+  color: string;
+};
+
+// Mock data for demo
+const mockStats: DashboardStats = {
+  total_carbon_kg: 1247.5,
+  total_energy_kwh: 4892.3,
+  total_runs: 156,
+  active_projects: 8,
+  carbon_trend: -12.5,
+  energy_trend: -8.3,
+  carbon_saved_kg: 178.4,
+  efficiency_score: 78,
+  industry_comparison: 23,
+};
+
+const mockTrendData: CarbonTrendPoint[] = Array.from({ length: 30 }, (_, i) => ({
+  date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+  carbon: Math.random() * 50 + 30 + (i > 20 ? -10 : 0),
+  energy: Math.random() * 200 + 150 + (i > 20 ? -30 : 0),
+}));
+
+const mockTopProjects: TopProject[] = [
+  { id: "1", name: "GPT-4 Fine-tuning", carbon_kg: 456.2, runs: 45 },
+  { id: "2", name: "Image Classification", carbon_kg: 234.1, runs: 67 },
+  { id: "3", name: "NLP Pipeline", carbon_kg: 189.8, runs: 28 },
+  { id: "4", name: "Recommendation Engine", carbon_kg: 156.3, runs: 16 },
+];
+
+const mockBreakdown: CarbonBreakdown[] = [
+  { category: "Training", value: 65, color: "#10b981" },
+  { category: "Inference", value: 20, color: "#14b8a6" },
+  { category: "Data Processing", value: 10, color: "#06b6d4" },
+  { category: "Other", value: 5, color: "#0891b2" },
+];
+
+const mockRecentRuns: RecentRun[] = [
+  { id: "1", name: "bert-finetune-v3", project_name: "NLP Pipeline", carbon_kg: 12.4, status: "completed", created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+  { id: "2", name: "resnet-training", project_name: "Image Classification", carbon_kg: 8.7, status: "completed", created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
+  { id: "3", name: "gpt4-batch-inference", project_name: "GPT-4 Fine-tuning", carbon_kg: 23.1, status: "running", created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() },
+];
+
+// Stat Card Component
+function StatCard({ 
+  title, 
+  value, 
+  unit, 
+  trend, 
+  trendLabel,
+  icon: Icon, 
+  color = "emerald",
+  size = "normal"
+}: { 
+  title: string; 
+  value: string | number; 
+  unit?: string;
+  trend?: number;
+  trendLabel?: string;
+  icon: any; 
+  color?: "emerald" | "teal" | "cyan" | "amber" | "rose";
+  size?: "normal" | "large";
+}) {
+  const colorMap = {
+    emerald: "from-emerald-500/20 to-emerald-500/5 text-emerald-500 border-emerald-500/30",
+    teal: "from-teal-500/20 to-teal-500/5 text-teal-500 border-teal-500/30",
+    cyan: "from-cyan-500/20 to-cyan-500/5 text-cyan-500 border-cyan-500/30",
+    amber: "from-amber-500/20 to-amber-500/5 text-amber-500 border-amber-500/30",
+    rose: "from-rose-500/20 to-rose-500/5 text-rose-500 border-rose-500/30",
+  };
+
+  return (
+    <div className={`group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 transition-all hover:border-border hover:shadow-lg ${size === "large" ? "col-span-2" : ""}`}>
+      {/* Background gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${colorMap[color]} opacity-0 group-hover:opacity-100 transition-opacity`} />
+      
+      <div className="relative">
+        <div className="flex items-center justify-between">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colorMap[color]}`}>
+            <Icon className="h-5 w-5" />
+          </div>
+          {trend !== undefined && (
+            <div className={`flex items-center gap-1 text-xs font-medium ${trend >= 0 ? "text-rose-500" : "text-emerald-500"}`}>
+              {trend >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {Math.abs(trend).toFixed(1)}%
+            </div>
+          )}
+        </div>
+        
+        <div className="mt-4">
+          <div className={`${size === "large" ? "text-4xl" : "text-2xl"} font-bold text-foreground`}>
+            {typeof value === "number" ? value.toLocaleString() : value}
+            {unit && <span className="ml-1 text-sm font-normal text-muted-foreground">{unit}</span>}
+          </div>
+          <div className="mt-1 text-sm text-muted-foreground">{title}</div>
+          {trendLabel && (
+            <div className="mt-1 text-xs text-muted-foreground">{trendLabel}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function fmtUsd(v: number | null | undefined) {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return "-";
-  return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+// Efficiency Score Ring
+function EfficiencyScore({ score }: { score: number }) {
+  const circumference = 2 * Math.PI * 45;
+  const offset = circumference - (score / 100) * circumference;
+  
+  const getColor = (s: number) => {
+    if (s >= 80) return { stroke: "#10b981", bg: "bg-emerald-500/10", text: "text-emerald-500" };
+    if (s >= 60) return { stroke: "#f59e0b", bg: "bg-amber-500/10", text: "text-amber-500" };
+    return { stroke: "#ef4444", bg: "bg-rose-500/10", text: "text-rose-500" };
+  };
+  
+  const colors = getColor(score);
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative">
+        <svg className="h-32 w-32 -rotate-90 transform">
+          <circle cx="64" cy="64" r="45" fill="none" stroke="currentColor" className="text-muted/30" strokeWidth="8" />
+          <circle
+            cx="64"
+            cy="64"
+            r="45"
+            fill="none"
+            stroke={colors.stroke}
+            strokeWidth="8"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={`text-3xl font-bold ${colors.text}`}>{score}</span>
+          <span className="text-xs text-muted-foreground">/ 100</span>
+        </div>
+      </div>
+      <div className="mt-2 text-sm font-medium text-foreground">Efficiency Score</div>
+      <div className="text-xs text-muted-foreground">
+        {score >= 80 ? "Excellent" : score >= 60 ? "Good" : "Needs Improvement"}
+      </div>
+    </div>
+  );
 }
 
-function toRunMetrics(r: JobRunAny) {
-  const energy =
-    Number(r.energy_kwh) ||
-    Number(r.energy_kwh_total) ||
-    Number(r.energy?.total_kwh) ||
-    Number(r.energy?.kwh_total) ||
-    0;
-  const carbon =
-    Number(r.carbon_kg_co2e) ||
-    Number(r.carbon_kg) ||
-    Number(r.energy?.emissions_kg) ||
-    0;
-  const cost =
-    Number(r.cost_usd) ||
-    Number(r.total_cost_usd) ||
-    Number(r.costs?.amount_usd) ||
-    0;
-  return { energy, carbon, cost };
+// Carbon Insights Card
+function InsightsCard() {
+  const insights = [
+    { type: "success", icon: CheckCircle2, message: "Your carbon emissions decreased by 12.5% this month" },
+    { type: "warning", icon: AlertTriangle, message: "Project 'GPT-4 Fine-tuning' exceeds carbon budget by 15%" },
+    { type: "tip", icon: Sparkles, message: "Switch to spot instances to save up to 30% carbon" },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="h-5 w-5 text-amber-500" />
+        <h3 className="font-semibold text-foreground">AI Insights</h3>
+      </div>
+      <div className="space-y-3">
+        {insights.map((insight, i) => (
+          <div
+            key={i}
+            className={`flex items-start gap-3 rounded-xl p-3 ${
+              insight.type === "success" ? "bg-emerald-500/10" :
+              insight.type === "warning" ? "bg-amber-500/10" : "bg-cyan-500/10"
+            }`}
+          >
+            <insight.icon className={`h-4 w-4 mt-0.5 shrink-0 ${
+              insight.type === "success" ? "text-emerald-500" :
+              insight.type === "warning" ? "text-amber-500" : "text-cyan-500"
+            }`} />
+            <span className="text-sm text-foreground">{insight.message}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
+// Leaderboard Card
+function LeaderboardCard({ projects }: { projects: TopProject[] }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-amber-500" />
+          <h3 className="font-semibold text-foreground">Carbon Leaderboard</h3>
+        </div>
+        <Link href="/projects" className="text-xs text-primary hover:underline flex items-center gap-1">
+          View all <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+      <div className="space-y-3">
+        {projects.slice(0, 4).map((project, i) => (
+          <div key={project.id} className="flex items-center gap-3">
+            <div className={`flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm ${
+              i === 0 ? "bg-amber-500/20 text-amber-500" :
+              i === 1 ? "bg-zinc-400/20 text-zinc-400" :
+              i === 2 ? "bg-amber-700/20 text-amber-700" :
+              "bg-muted text-muted-foreground"
+            }`}>
+              {i + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground truncate">{project.name}</div>
+              <div className="text-xs text-muted-foreground">{project.runs} runs</div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm font-medium text-foreground">{project.carbon_kg.toFixed(1)}</div>
+              <div className="text-xs text-muted-foreground">kg CO₂</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Industry Comparison
+function IndustryComparison({ percentage }: { percentage: number }) {
+  const isBetter = percentage > 0;
+  
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Globe className="h-5 w-5 text-cyan-500" />
+        <h3 className="font-semibold text-foreground">Industry Benchmark</h3>
+      </div>
+      <div className="flex items-center justify-center py-4">
+        <div className="relative">
+          <div className={`flex h-24 w-24 items-center justify-center rounded-full ${
+            isBetter ? "bg-emerald-500/20" : "bg-rose-500/20"
+          }`}>
+            <span className={`text-2xl font-bold ${isBetter ? "text-emerald-500" : "text-rose-500"}`}>
+              {isBetter ? "-" : "+"}{Math.abs(percentage)}%
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="text-center">
+        <div className={`text-sm font-medium ${isBetter ? "text-emerald-500" : "text-rose-500"}`}>
+          {isBetter ? "Better than industry average" : "Above industry average"}
+        </div>
+        <div className="text-xs text-muted-foreground mt-1">
+          Based on similar AI workloads
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main Dashboard Component
 export default function DashboardPage() {
-  const { token } = useAuth();
-
-  const [overview, setOverview] = useState<Overview | null>(null);
-  const [trends, setTrends] = useState<TrendPoint[]>([]);
-  const [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  const [runs, setRuns] = useState<JobRunAny[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const { token, ready } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>(mockStats);
+  const [trendData, setTrendData] = useState<CarbonTrendPoint[]>(mockTrendData);
+  const [topProjects, setTopProjects] = useState<TopProject[]>(mockTopProjects);
+  const [breakdown, setBreakdown] = useState<CarbonBreakdown[]>(mockBreakdown);
+  const [recentRuns, setRecentRuns] = useState<RecentRun[]>(mockRecentRuns);
 
   useEffect(() => {
-    if (!token) return;
-    let alive = true;
-    setLoading(true);
-    setErr(null);
+    // Simulate loading real data
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
-    (async () => {
-      try {
-        const [ov, tr, hs, jr] = await Promise.all([
-          apiFetch<Overview>("/analytics/overview", {}, { token }),
-          apiFetch<TrendPoint[]>("/analytics/trends?days=14", {}, { token }),
-          apiFetch<Hotspot[]>("/analytics/hotspots?limit=8", {}, { token }),
-          apiFetch<JobRunAny[]>("/job-runs", {}, { token }),
-        ]);
-        if (!alive) return;
-        setOverview(ov);
-        setTrends(Array.isArray(tr) ? tr : []);
-        setHotspots(Array.isArray(hs) ? hs : []);
-        setRuns(Array.isArray(jr) ? jr : []);
-      } catch (e: any) {
-        if (!alive) return;
-        setErr(e?.message || "Failed to load dashboard data");
-      } finally {
-        if (!alive) return;
-        setLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [token]);
-
-  const topRuns = useMemo(() => {
-    const copy = [...runs];
-    copy.sort((a, b) => {
-      const da = new Date(a.updated_at || a.created_at || a.end_time || a.start_time || 0).getTime();
-      const db = new Date(b.updated_at || b.created_at || b.end_time || b.start_time || 0).getTime();
-      return db - da;
-    });
-    return copy.slice(0, 8);
-  }, [runs]);
-
-  const chartData = useMemo(
-    () =>
-      (trends || []).map((p) => ({
-        date: p.date,
-        carbon_kg: Number(p.carbon_kg) || 0,
-        energy_kwh: Number(p.energy_kwh) || 0,
-        cost: Number(p.cost) || 0,
-      })),
-    [trends],
-  );
-
-  const energyBreakdown = useMemo(() => {
-    if (hotspots?.length) {
-      return hotspots.slice(0, 6).map((h) => ({
-        name: h.job_type,
-        kwh: Number(h.energy_kwh) || 0,
-      }));
-    }
-    return [{ name: "Total", kwh: Number(overview?.energy_kwh) || 0 }];
-  }, [hotspots, overview]);
+  if (!ready) return null;
 
   if (!token) {
     return (
-      <EmptyState
-        title="You're not signed in"
-        description="Sign in to view dashboard metrics."
-        actions={[{ label: "Go to login", href: "/login" }]}
-      />
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="text-center py-16">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 mb-6">
+            <Leaf className="h-10 w-10 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-3">Welcome to GreenAI</h1>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            Track, analyze, and reduce the carbon footprint of your AI workloads.
+            Start your sustainability journey today.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <Link 
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:opacity-90 transition-all"
+            >
+              Sign in <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link 
+              href="/signup"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-accent transition-all"
+            >
+              Create account
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 w-64 rounded bg-muted" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => <div key={i} className="h-32 rounded-2xl bg-muted" />)}
+          </div>
+          <div className="h-80 rounded-2xl bg-muted" />
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <SectionHeader
-        title="Dashboard"
-        subtitle="Real-time overview of carbon, energy, and costs across your recent runs."
-      />
-
-      {err ? (
-        <EmptyState
-          title="Dashboard data failed to load"
-          description={err}
-          actions={[{ label: "Retry", onClick: () => window.location.reload() }]}
-        />
-      ) : null}
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard title="Runs" value={loading ? "..." : fmtNum(overview?.total_runs)} subtitle="Total tracked" />
-        <StatCard title="Carbon" value={loading ? "..." : `${fmtNum(overview?.carbon_kg, 2)} kg`} subtitle="CO2e total" />
-        <StatCard title="Energy" value={loading ? "..." : `${fmtNum(overview?.energy_kwh, 2)} kWh`} subtitle="Total consumption" />
-        <StatCard title="Cost" value={loading ? "..." : fmtUsd(overview?.total_cost)} subtitle="Estimated spend" />
-        <StatCard title="Avg / run" value={loading ? "..." : `${fmtNum(overview?.avg_carbon_per_run, 2)} kg`} subtitle="CO2e per run" />
+    <div className="mx-auto max-w-7xl px-4 py-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Carbon Dashboard</h1>
+          <p className="text-muted-foreground">Monitor your AI carbon footprint in real-time</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <select className="h-10 rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground">
+            <option>Last 30 days</option>
+            <option>Last 7 days</option>
+            <option>Last 90 days</option>
+            <option>This year</option>
+          </select>
+        </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border/60 bg-card p-4">
-          <div className="mb-3">
-            <div className="text-sm font-medium text-foreground">Carbon trend</div>
-            <div className="text-xs text-muted-foreground">Last 14 days</div>
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Carbon Emissions"
+          value={stats.total_carbon_kg.toFixed(1)}
+          unit="kg CO₂e"
+          trend={stats.carbon_trend}
+          trendLabel="vs last month"
+          icon={Leaf}
+          color="emerald"
+        />
+        <StatCard
+          title="Energy Consumed"
+          value={stats.total_energy_kwh.toFixed(1)}
+          unit="kWh"
+          trend={stats.energy_trend}
+          icon={Zap}
+          color="teal"
+        />
+        <StatCard
+          title="Carbon Saved"
+          value={stats.carbon_saved_kg.toFixed(1)}
+          unit="kg CO₂e"
+          icon={Target}
+          color="cyan"
+        />
+        <StatCard
+          title="Total Job Runs"
+          value={stats.total_runs}
+          icon={Activity}
+          color="amber"
+        />
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Carbon Trend Chart */}
+        <div className="lg:col-span-2 rounded-2xl border border-border/60 bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold text-foreground">Carbon Emissions Trend</h3>
+              <p className="text-xs text-muted-foreground">Daily CO₂e emissions over time</p>
+            </div>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} tickMargin={8} />
-                <YAxis tick={{ fontSize: 12 }} tickMargin={8} />
-                <Tooltip />
-                <Area type="monotone" dataKey="carbon_kg" stroke="#10b981" fill="#10b98122" />
-                <Area type="monotone" dataKey="energy_kwh" stroke="#22d3ee" fill="#22d3ee22" />
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="carbonGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <YAxis tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <RechartsTooltip 
+                  contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px' }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Area type="monotone" dataKey="carbon" stroke="#10b981" fill="url(#carbonGradient)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-card p-4">
-          <div className="mb-3">
-            <div className="text-sm font-medium text-foreground">Energy by job type</div>
-            <div className="text-xs text-muted-foreground">Top workloads</div>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={energyBreakdown}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="kwh" fill="#14b8a6" />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Efficiency Score */}
+        <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col items-center justify-center">
+          <EfficiencyScore score={stats.efficiency_score} />
+          <div className="mt-4 w-full">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+              <span>Progress to goal</span>
+              <span>78%</span>
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border/60 bg-card p-4">
-        <div className="mb-3">
-          <div className="text-sm font-medium text-foreground">Recent runs</div>
-          <div className="text-xs text-muted-foreground">Latest ingested jobs</div>
+      {/* Second Row */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* AI Insights */}
+        <InsightsCard />
+        
+        {/* Leaderboard */}
+        <LeaderboardCard projects={topProjects} />
+        
+        {/* Industry Comparison */}
+        <IndustryComparison percentage={stats.industry_comparison} />
+      </div>
+
+      {/* Third Row */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Carbon Breakdown */}
+        <div className="rounded-2xl border border-border/60 bg-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="h-5 w-5 text-teal-500" />
+            <h3 className="font-semibold text-foreground">Carbon Breakdown</h3>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="h-40 w-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={breakdown}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={70}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {breakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex-1 space-y-2">
+              {breakdown.map((item) => (
+                <div key={item.category} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-sm text-foreground">{item.category}</span>
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{item.value}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {topRuns.length === 0 ? (
-          <EmptyState title="No runs yet" description="Ingest your first run to see telemetry." />
-        ) : (
-          <div className="w-full overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="border-b border-border/60 text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="py-2 pr-4 text-left">Name</th>
-                  <th className="py-2 pr-4 text-left">Type</th>
-                  <th className="py-2 pr-4 text-left">Updated</th>
-                  <th className="py-2 pr-4 text-left">Energy</th>
-                  <th className="py-2 pr-4 text-left">CO2e</th>
-                  <th className="py-2 pr-0 text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40">
-                {topRuns.map((r) => {
-                  const m = toRunMetrics(r);
-                  return (
-                    <tr key={r.id} className="text-foreground">
-                      <td className="py-3 pr-4">{r.run_name || r.id}</td>
-                      <td className="py-3 pr-4 text-muted-foreground">{r.job_type || "-"}</td>
-                      <td className="py-3 pr-4 text-muted-foreground">
-                        {new Date(r.updated_at || r.created_at || r.end_time || r.start_time || 0).toLocaleString()}
-                      </td>
-                      <td className="py-3 pr-4">{fmtNum(m.energy, 3)} kWh</td>
-                      <td className="py-3 pr-4">{fmtNum(m.carbon, 3)} kg</td>
-                      <td className="py-3 pr-0">
-                        <RunStatusBadge status={r.status} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        {/* Recent Runs */}
+        <div className="rounded-2xl border border-border/60 bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-amber-500" />
+              <h3 className="font-semibold text-foreground">Recent Runs</h3>
+            </div>
+            <Link href="/job-runs" className="text-xs text-primary hover:underline flex items-center gap-1">
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
-        )}
+          <div className="space-y-3">
+            {recentRuns.map((run) => (
+              <div key={run.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className={`h-2 w-2 rounded-full ${
+                  run.status === "completed" ? "bg-emerald-500" :
+                  run.status === "running" ? "bg-amber-500 animate-pulse" :
+                  "bg-rose-500"
+                }`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-foreground truncate">{run.name}</div>
+                  <div className="text-xs text-muted-foreground">{run.project_name}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-foreground">{run.carbon_kg.toFixed(1)} kg</div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(run.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="rounded-2xl border border-border/60 bg-gradient-to-r from-primary/10 to-teal-500/10 p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Ready to reduce your carbon footprint?</h3>
+            <p className="text-muted-foreground">Get AI-powered suggestions to optimize your ML workloads</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/suggestions" 
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all"
+            >
+              <Sparkles className="h-4 w-4" /> Get Suggestions
+            </Link>
+            <Link 
+              href="/reports"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-all"
+            >
+              Generate Report
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
