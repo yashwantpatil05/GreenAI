@@ -124,18 +124,18 @@ export default function ProjectsPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {loading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950">
+          <div className="rounded-2xl border border-border/60 bg-card p-4 text-sm text-muted-foreground">
             Loading projects…
           </div>
         ) : items.length === 0 ? (
           <EmptyState title="No projects yet" description="Create your first project to begin tracking runs." />
         ) : (
           items.map((p) => (
-            <div key={p.id} className="card p-4">
-              <div className="text-lg font-semibold text-slate-100">{p.name}</div>
-              <div className="mt-1 text-sm text-slate-400">{p.description || "No description"}</div>
-              <div className="mt-3 text-xs text-slate-500">Created: {fmtDate(p.created_at)}</div>
-              <div className="mt-2 text-xs text-slate-500 break-all">Project ID: {p.id}</div>
+            <div key={p.id} className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
+              <div className="text-lg font-semibold text-foreground">{p.name}</div>
+              <div className="mt-1 text-sm text-muted-foreground">{p.description || "No description"}</div>
+              <div className="mt-3 text-xs text-muted-foreground">Created: {fmtDate(p.created_at)}</div>
+              <div className="mt-2 text-xs text-muted-foreground break-all">Project ID: {p.id}</div>
             </div>
           ))
         )}
