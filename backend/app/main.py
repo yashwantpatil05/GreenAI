@@ -24,4 +24,7 @@ app.middleware("http")(request_id_middleware)
 app.middleware("http")(logging_middleware)
 
 app.include_router(api_router, prefix="/api")
+# Health endpoints at root (internal access)
 app.include_router(system_router)
+# Also register health endpoints under /api for external access via ingress
+app.include_router(system_router, prefix="/api")
