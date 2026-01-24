@@ -574,7 +574,7 @@ export default function DashboardPage() {
 
         {/* Efficiency Score */}
         <div className="rounded-2xl border border-border/60 bg-card p-5 flex flex-col items-center justify-center">
-          <EfficiencyScore score={stats.efficiency_score} />
+          <EfficiencyScore score={stats?.efficiency_score ?? 0} />
           <div className="mt-4 w-full">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
               <span>Progress to goal</span>
@@ -596,7 +596,7 @@ export default function DashboardPage() {
         <LeaderboardCard projects={topProjects} />
         
         {/* Industry Comparison */}
-        <IndustryComparison percentage={stats.industry_comparison} />
+        <IndustryComparison percentage={stats?.industry_comparison} />
       </div>
 
       {/* Third Row */}
