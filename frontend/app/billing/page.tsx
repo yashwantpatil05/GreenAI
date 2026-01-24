@@ -239,7 +239,7 @@ export default function BillingPage() {
           method: "POST",
           body: JSON.stringify({ plan_id: planId }),
         },
-        { token }
+        { token: token || undefined }
       );
 
       // Open Razorpay checkout
@@ -264,11 +264,11 @@ export default function BillingPage() {
                   plan_id: planId,
                 }),
               },
-              { token }
+              { token: token || undefined }
             );
 
             // Reload usage data
-            const newUsage = await apiFetch<Usage>("/billing/usage", {}, { token });
+            const newUsage = await apiFetch<Usage>("/billing/usage", {}, { token: token || undefined });
             setUsage(newUsage);
             alert("Subscription activated successfully!");
           } catch (e: any) {
