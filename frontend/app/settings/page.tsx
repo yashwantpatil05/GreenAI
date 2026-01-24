@@ -117,13 +117,13 @@ export default function SettingsPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800/70 dark:bg-slate-950">
+        <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+              <h3 className="text-base font-semibold text-foreground">
                 Organization
               </h3>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Update your org name and default region.
               </p>
             </div>
@@ -131,7 +131,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => orgQ.refetch()}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
+              className="rounded-xl border border-border/60 bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-accent"
               disabled={orgQ.isFetching}
             >
               {orgQ.isFetching ? "Refreshing..." : "Refresh"}
@@ -140,9 +140,9 @@ export default function SettingsPage() {
 
           {orgQ.isLoading ? (
             <div className="space-y-3">
-              <div className="h-10 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900" />
-              <div className="h-10 w-full animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900" />
-              <div className="h-10 w-40 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900" />
+              <div className="h-10 w-full animate-pulse rounded-xl bg-muted" />
+              <div className="h-10 w-full animate-pulse rounded-xl bg-muted" />
+              <div className="h-10 w-40 animate-pulse rounded-xl bg-muted" />
             </div>
           ) : orgQ.isError ? (
             <EmptyState
@@ -159,29 +159,29 @@ export default function SettingsPage() {
               }}
             >
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                <label className="text-sm font-medium text-foreground">
                   Organization name
                 </label>
                 <input
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   placeholder="Your organization"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 focus:border-slate-300 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                  className="w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none ring-0 focus:border-border focus:outline-none"
                   maxLength={200}
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   This appears across dashboards and reports.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                <label className="text-sm font-medium text-foreground">
                   Default region
                 </label>
                 <select
                   value={form.region_preference}
                   onChange={(e) => setForm((p) => ({ ...p, region_preference: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 focus:border-slate-300 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                  className="w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none ring-0 focus:border-border focus:outline-none"
                 >
                   {REGIONS.map((r) => (
                     <option key={r} value={r}>
@@ -189,7 +189,7 @@ export default function SettingsPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-slate-500 dark:text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Used as a fallback for emissions factors and reporting.
                 </p>
               </div>
@@ -198,7 +198,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={disabled}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+                  className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {saving ? "Saving..." : "Save changes"}
                 </button>
@@ -212,17 +212,17 @@ export default function SettingsPage() {
                       region_preference: (orgQ.data.region_preference || "ap-south-1") as string,
                     });
                   }}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
+                  className="rounded-xl border border-border/60 bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-accent"
                 >
                   Reset
                 </button>
 
                 {saveM.isError ? (
-                  <span className="text-sm text-rose-600 dark:text-rose-400">
+                  <span className="text-sm text-destructive">
                     Failed to save. Try again.
                   </span>
                 ) : saveM.isSuccess ? (
-                  <span className="text-sm text-emerald-600 dark:text-emerald-400">
+                  <span className="text-sm text-emerald-500">
                     Saved.
                   </span>
                 ) : null}
@@ -231,43 +231,43 @@ export default function SettingsPage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800/70 dark:bg-slate-950">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+        <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+          <h3 className="text-base font-semibold text-foreground">
             Security
           </h3>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage your session and access.
           </p>
 
           <div className="mt-4 space-y-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/30">
-              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <div className="rounded-2xl border border-border/60 bg-muted/30 p-4">
+              <div className="text-sm font-semibold text-foreground">
                 Session
               </div>
-              <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+              <div className="mt-1 text-sm text-muted-foreground">
                 {userEmail || "Signed in"}
               </div>
               <div className="mt-3 flex items-center gap-3">
                 <button
                   type="button"
                   onClick={logout}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+                  className="rounded-xl border border-border/60 bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-accent"
                 >
                   Sign out
                 </button>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <div className="rounded-2xl border border-border/60 bg-card p-4">
+              <div className="text-sm font-semibold text-foreground">
                 API keys
               </div>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Create project keys from the API Keys page and use them in SDK/CLI ingestion.
               </p>
               <a
                 href="/api-keys"
-                className="mt-3 inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+                className="mt-3 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90"
               >
                 Go to API Keys
               </a>
