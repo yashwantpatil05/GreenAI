@@ -69,7 +69,7 @@ export default function ApiKeysPage() {
     if (!token) return;
     setProjectsLoading(true);
     try {
-      const data = await apiFetch<Project[]>("/projects/", { method: "GET" }, { token });
+      const data = await apiFetch<Project[]>("/projects", { method: "GET" }, { token });
       setProjects(data || []);
       if (!newProjectId && data?.length) setNewProjectId(data[0].id);
     } catch (e: any) {
