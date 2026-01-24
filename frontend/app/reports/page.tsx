@@ -220,7 +220,7 @@ export default function ReportsPage() {
             <select
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-slate-200"
+              className="h-10 rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="">All projects</option>
               {projects.map((p) => (
@@ -238,7 +238,7 @@ export default function ReportsPage() {
                 createReport.mutate(pid);
               }}
               disabled={!token || createReport.isPending || (!projectId && projects.length === 0)}
-              className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+              className="h-10 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
               title={!projectId && projects.length === 0 ? "Create a project first" : "Generate report"}
            >
               {createReport.isPending ? "Generating..." : "Generate report"}
@@ -248,7 +248,7 @@ export default function ReportsPage() {
       />
 
       {error ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {String(error)}
         </div>
       ) : null}
@@ -266,13 +266,13 @@ export default function ReportsPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by report, project, period, status"
-            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-slate-200"
+            className="h-10 w-full rounded-xl border border-border/60 bg-background px-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
 
       {loading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
+        <div className="rounded-2xl border border-border/60 bg-card p-6 text-sm text-muted-foreground">
           Loading...
         </div>
       ) : filtered.length === 0 ? (
