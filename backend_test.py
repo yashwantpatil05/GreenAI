@@ -224,6 +224,77 @@ class GreenAIAPITester:
             self.log_test("Projects Endpoint (No Auth)", False, f"Request failed: {str(e)}")
             return False
 
+    def test_auth_signup_endpoint(self) -> bool:
+        """Test POST /api/auth/signup endpoint"""
+        try:
+            test_data = {
+                "email": "testuser456@example.com",
+                "password": "testpassword456",
+                "organization_name": "Test Org 456"
+            }
+            
+            response = self.session.post(f"{self.base_url}/auth/signup", json=test_data, timeout=10)
+            
+            # Should return 201 for successful signup or 409 if user already exists
+            if response.status_code == 201:
+                try:
+                    data = response.json()
+                    if data.get("email") == test_data["email"]:
+                        self.log_test("Auth Signup Endpoint", True, f"Status: {response.status_code}, User created successfully")
+                        return True
+                    else:
+                        self.log_test("Auth Signup Endpoint", False, f"Status: {response.status_code}, Invalid response data")
+                        return False
+                except json.JSONDecodeError:
+                    self.log_test("Auth Signup Endpoint", False, f"Status: {response.status_code}, Invalid JSON response")
+                    return False
+            elif response.status_code == 409:
+                self.log_test("Auth Signup Endpoint", True, f"Status: {response.status_code} - User already exists (expected)")
+                return True
+            else:
+                self.log_test("Auth Signup Endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("Auth Signup Endpoint", False, f"Request failed: {str(e)}")
+            return False
+
+    def test_auth_token_endpoint(self) -> bool:
+        """Test POST /api/auth/token endpoint"""
+        try:
+            # Use form data for OAuth2PasswordRequestForm
+            form_data = {
+                "username": "testuser456@example.com",
+                "password": "testpassword456"
+            }
+            
+            # Remove JSON content type for form data
+            headers = {'User-Agent': 'GreenAI-Test-Client/1.0'}
+            response = requests.post(f"{self.base_url}/auth/token", data=form_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if data.get("access_token"):
+                        self.log_test("Auth Token Endpoint", True, f"Status: {response.status_code}, Token received")
+                        return True
+                    else:
+                        self.log_test("Auth Token Endpoint", False, f"Status: {response.status_code}, No access token in response")
+                        return False
+                except json.JSONDecodeError:
+                    self.log_test("Auth Token Endpoint", False, f"Status: {response.status_code}, Invalid JSON response")
+                    return False
+            elif response.status_code == 404:
+                self.log_test("Auth Token Endpoint", True, f"Status: {response.status_code} - User not provisioned (expected if signup failed)")
+                return True
+            else:
+                self.log_test("Auth Token Endpoint", False, f"Status: {response.status_code}, Response: {response.text}")
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("Auth Token Endpoint", False, f"Request failed: {str(e)}")
+            return False
+
     def run_all_tests(self) -> Dict[str, Any]:
         """Run all backend tests"""
         print("🚀 Starting GreenAI Backend API Tests")
