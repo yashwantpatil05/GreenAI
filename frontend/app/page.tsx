@@ -313,17 +313,64 @@ function IndustryComparison({ percentage }: { percentage: number }) {
 export default function DashboardPage() {
   const { token, ready } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>(mockStats);
-  const [trendData, setTrendData] = useState<CarbonTrendPoint[]>(mockTrendData);
-  const [topProjects, setTopProjects] = useState<TopProject[]>(mockTopProjects);
-  const [breakdown, setBreakdown] = useState<CarbonBreakdown[]>(mockBreakdown);
-  const [recentRuns, setRecentRuns] = useState<RecentRun[]>(mockRecentRuns);
+  const [hasData, setHasData] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [trendData, setTrendData] = useState<CarbonTrendPoint[]>([]);
+  const [topProjects, setTopProjects] = useState<TopProject[]>([]);
+  const [breakdown, setBreakdown] = useState<CarbonBreakdown[]>([]);
+  const [recentRuns, setRecentRuns] = useState<RecentRun[]>([]);
 
   useEffect(() => {
-    // Simulate loading real data
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    async function loadDashboardData() {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch real analytics data
+        const analyticsData = await apiFetch<any>("/analytics/dashboard", {}, { token });
+        
+        if (analyticsData && analyticsData.total_runs > 0) {
+          setHasData(true);
+          setStats(analyticsData);
+          // Set other real data if available
+        } else {
+          setHasData(false);
+        }
+      } catch (error) {
+        // If analytics endpoint doesn't exist or returns error, check if we have any job runs
+        try {
+          const runs = await apiFetch<any[]>("/job-runs", {}, { token });
+          if (runs && runs.length > 0) {
+            setHasData(true);
+            // Calculate basic stats from runs
+            const totalCarbon = runs.reduce((sum, r) => sum + (r.carbon_emissions_kg || 0), 0);
+            const totalEnergy = runs.reduce((sum, r) => sum + (r.energy_consumed_kwh || 0), 0);
+            setStats({
+              total_carbon_kg: totalCarbon,
+              total_energy_kwh: totalEnergy,
+              total_runs: runs.length,
+              active_projects: 0,
+              carbon_trend: 0,
+              energy_trend: 0,
+              carbon_saved_kg: 0,
+              efficiency_score: 0,
+              industry_comparison: 0,
+            });
+          } else {
+            setHasData(false);
+          }
+        } catch {
+          setHasData(false);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, [token]);
 
   if (!ready) return null;
 
@@ -372,6 +419,75 @@ export default function DashboardPage() {
     );
   }
 
+  // Show empty state if no data
+  if (!hasData) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16">
+        <div className="text-center space-y-6">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500/10">
+            <BarChart3 className="h-12 w-12 text-emerald-500" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-3">Welcome to Your Dashboard</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
+              Your carbon tracking dashboard is ready! Start sending job run data to see analytics, trends, and insights.
+            </p>
+          </div>
+          
+          <div className="rounded-2xl border border-border/60 bg-card p-8 max-w-2xl mx-auto text-left">
+            <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Zap className="h-5 w-5 text-emerald-500" />
+              Quick Start Guide
+            </h3>
+            <ol className="space-y-4 text-sm text-muted-foreground">
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 font-semibold text-xs">1</span>
+                <div>
+                  <strong className="text-foreground">Create a Project</strong> - Go to <Link href="/projects" className="text-primary hover:underline">Projects</Link> and create your first project
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 font-semibold text-xs">2</span>
+                <div>
+                  <strong className="text-foreground">Generate API Key</strong> - Go to <Link href="/api-keys" className="text-primary hover:underline">API Keys</Link> and create a key for your project
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 font-semibold text-xs">3</span>
+                <div>
+                  <strong className="text-foreground">Send Job Run Data</strong> - Use your API key to track ML workloads (see <code className="px-2 py-1 bg-muted rounded text-xs">/app/HOW_TO_USE_GREENAI.md</code> for integration guide)
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 font-semibold text-xs">4</span>
+                <div>
+                  <strong className="text-foreground">View Analytics</strong> - Return here to see carbon emissions, trends, and insights
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <div className="flex items-center justify-center gap-4 pt-4">
+            <Link 
+              href="/projects"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:opacity-90 transition-all"
+            >
+              Create Your First Project <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a 
+              href="/app/HOW_TO_USE_GREENAI.md"
+              target="_blank"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-accent transition-all"
+            >
+              View Integration Guide
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show dashboard with real data
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 space-y-6">
       {/* Header */}
