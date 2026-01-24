@@ -18,21 +18,14 @@ function resolveTheme(mode: ThemeMode): "light" | "dark" {
   return mode;
 }
 
-/**
- * Apply theme to <html>.
- * IMPORTANT: only "dark" class is used by Tailwind. "light" is optional.
- */
 function applyTheme(mode: ThemeMode) {
   if (typeof document === "undefined") return;
 
   const root = document.documentElement;
   const resolved = resolveTheme(mode);
 
-  // Tailwind uses "dark" class. Keep "light" for readability/explicitness.
   root.classList.toggle("dark", resolved === "dark");
   root.classList.toggle("light", resolved === "light");
-
-  // browser UI color scheme
   root.style.colorScheme = resolved;
 }
 
@@ -56,7 +49,6 @@ export function ThemeToggle() {
   const [mode, setMode] = React.useState<ThemeMode>("system");
   const [mounted, setMounted] = React.useState(false);
 
-  // Init (avoid hydration mismatch for icons/labels)
   React.useEffect(() => {
     const stored = readStoredTheme();
     setMode(stored);
@@ -75,9 +67,7 @@ export function ThemeToggle() {
       media.addEventListener("change", onChange);
       return () => media.removeEventListener("change", onChange);
     } catch {
-      // eslint-disable-next-line deprecation/deprecation
       media.addListener(onChange);
-      // eslint-disable-next-line deprecation/deprecation
       return () => media.removeListener(onChange);
     }
   }, []);
@@ -89,46 +79,28 @@ export function ThemeToggle() {
     applyTheme(nm);
   };
 
-  // Render a stable skeleton until mounted (prevents "flash" + mismatch)
   const safeMode: ThemeMode = mounted ? mode : "system";
 
-  const label =
-    safeMode === "system"
-      ? "Theme: System"
-      : safeMode === "light"
-      ? "Theme: Light"
-      : "Theme: Dark";
+  const Icon = safeMode === "dark" ? Moon : safeMode === "light" ? Sun : Monitor;
+  const label = safeMode === "system" ? "System" : safeMode === "light" ? "Light" : "Dark";
 
   return (
     <button
       type="button"
       onClick={cycle}
-      aria-label={label}
-      title={label}
-      className={[
-        "group inline-flex h-10 items-center gap-2 rounded-full border border-border/60 bg-background px-3",
-        "text-sm text-muted-foreground shadow-sm transition",
-        "hover:bg-accent/60 hover:text-foreground",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
-      ].join(" ")}
+      aria-label={`Theme: ${label}`}
+      title={`Theme: ${label} (click to cycle)`}
+      data-testid="theme-toggle"
+      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background text-muted-foreground shadow-sm transition-all hover:bg-accent hover:text-foreground hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
     >
-      <span className="grid h-8 w-8 place-items-center rounded-full border border-border/60 bg-muted/30">
-        {safeMode === "dark" ? (
-          <Moon className="h-4 w-4" />
-        ) : safeMode === "light" ? (
-          <Sun className="h-4 w-4" />
-        ) : (
-          <Monitor className="h-4 w-4" />
-        )}
-      </span>
-
-      <span className="hidden sm:inline">
-        {safeMode === "system" ? "System" : safeMode === "light" ? "Light" : "Dark"}
-      </span>
-
-      <span className="ml-1 hidden rounded-md border border-border/60 bg-muted/30 px-2 py-1 text-[11px] text-muted-foreground md:inline">
-        {safeMode === "system" ? "Auto" : "Manual"}
-      </span>
+      <Icon className="h-[18px] w-[18px]" />
+      
+      {/* Mode indicator dot */}
+      <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background ${
+        safeMode === "dark" ? "bg-indigo-500" : 
+        safeMode === "light" ? "bg-amber-500" : 
+        "bg-emerald-500"
+      }`} />
     </button>
   );
 }
