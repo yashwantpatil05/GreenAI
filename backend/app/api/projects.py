@@ -1,0 +1,178 @@
+"""Project management routes."""
+from fastapi import APIRouter, Depends
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from backend.app.auth.deps import get_current_user, require_roles
+from backend.app.core.database import get_db
+from backend.app.schemas.api_key import ApiKeyCreate, ApiKeyRead
+from backend.app.schemas.organization import ProjectCreate, ProjectRead
+from backend.app.schemas.pagination import PaginationParams, PaginatedResponse
+from backend.app.models.project import Project
+from backend.app.services.project_service import (
+    create_api_key,
+    create_project,
+    list_projects,
+    list_api_keys_for_org,
+    unblock_api_key,
+    revoke_api_key,
+)
+from backend.app.services.audit_service import audit_log, AuditEvent
+from backend.app.auth.context import get_request_context
+from backend.app.services.subscription_limits import check_projects_limit
+
+
+router = APIRouter()
+
+
+def _create_project_logic(
+    payload: ProjectCreate,
+    db: Session,
+    user,
+    ctx,
+):
+    """Create a project for the current organization."""
+    # Check subscription limits before creating project
+    check_projects_limit(user.organization_id, db)
+
+    project = create_project(db, user.organization_id, payload)
+    audit_log(
+        AuditEvent(
+            organization_id=user.organization_id,
+            actor_type="user",
+            actor_user_id=user.id,
+            action="project.create",
+            resource_type="project",
+            resource_id=project.id,
+            request_id=ctx.request_id,
+        ),
+        db,
+    )
+    return project
+
+
+def _list_projects_logic(db: Session, user):
+    """List projects for the organization."""
+    return list_projects(db, user.organization_id)
+
+
+@router.post("/", response_model=ProjectRead)
+@router.post("", response_model=ProjectRead)
+def create_project_endpoint(
+    payload: ProjectCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("owner", "admin")),
+    ctx=Depends(get_request_context),
+):
+    """Create a project for the current organization."""
+    return _create_project_logic(payload, db, user, ctx)
+
+
+@router.get("/", response_model=PaginatedResponse[ProjectRead])
+@router.get("", response_model=PaginatedResponse[ProjectRead])
+def list_project_endpoint(
+    pagination: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    """List projects for the organization with pagination."""
+    # Get total count
+    total = db.query(func.count(Project.id)).filter(
+        Project.organization_id == user.organization_id
+    ).scalar()
+
+    # Get paginated items
+    projects = (
+        db.query(Project)
+        .filter(Project.organization_id == user.organization_id)
+        .order_by(Project.created_at.desc())
+        .offset(pagination.offset)
+        .limit(pagination.limit)
+        .all()
+    )
+
+    return PaginatedResponse.create(
+        items=projects,
+        total=total or 0,
+        page=pagination.page,
+        page_size=pagination.page_size
+    )
+
+
+@router.post("/api-keys", response_model=ApiKeyRead)
+def create_api_key_endpoint(
+    payload: ApiKeyCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("owner", "admin", "engineer")),
+    ctx=Depends(get_request_context),
+):
+    """Create API key."""
+    api_key, raw_key = create_api_key(db, user.id, user.organization_id, payload)
+    api_key.raw_key = raw_key  # type: ignore[attr-defined]
+    audit_log(
+        AuditEvent(
+            organization_id=user.organization_id,
+            actor_type="user",
+            actor_user_id=user.id,
+            action="api_key.create",
+            resource_type="api_key",
+            resource_id=api_key.id,
+            request_id=ctx.request_id,
+        ),
+        db,
+    )
+    return api_key
+
+
+@router.get("/api-keys", response_model=list[ApiKeyRead])
+def list_api_keys_endpoint(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    """List API keys for the organization."""
+    return list_api_keys_for_org(db, user.organization_id)
+
+
+@router.post("/api-keys/{api_key_id}/unblock", response_model=ApiKeyRead)
+def unblock_api_key_endpoint(
+    api_key_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("owner", "admin")),
+    ctx=Depends(get_request_context),
+):
+    """Unblock an API key after abuse protection."""
+    key = unblock_api_key(db, user.organization_id, api_key_id)
+    audit_log(
+        AuditEvent(
+            organization_id=user.organization_id,
+            actor_type="user",
+            actor_user_id=user.id,
+            action="api_key.unblock",
+            resource_type="api_key",
+            resource_id=key.id,
+            request_id=ctx.request_id,
+        ),
+        db,
+    )
+    return key
+
+
+@router.post("/api-keys/{api_key_id}/revoke", response_model=ApiKeyRead)
+def revoke_api_key_endpoint(
+    api_key_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles("owner", "admin")),
+    ctx=Depends(get_request_context),
+):
+    """Revoke an API key permanently."""
+    key = revoke_api_key(db, user.organization_id, api_key_id)
+    audit_log(
+        AuditEvent(
+            organization_id=user.organization_id,
+            actor_type="user",
+            actor_user_id=user.id,
+            action="api_key.revoke",
+            resource_type="api_key",
+            resource_id=key.id,
+            request_id=ctx.request_id,
+        ),
+        db,
+    )
+    return key

@@ -1,0 +1,72 @@
+# Node / frontend
+node_modules/
+.next/
+out/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv*/
+
+# Env
+backend/.venv
+.env
+.env.*
+!.env.example
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+*.env
+*.env.*
+!.env.example
+
+# Generated / local output
+generated_reports/
+backend/storage/
+htmlcov/
+
+# Coverage
+.coverage
+coverage.xml
+
+# Claude AI context
+.claude/
+
+# Python build artifacts
+*.egg-info/
+*.egg
+build/
+sdist/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Windows null files
+nul
+sdk/nul
+
+# Security / audit output (local only)
+backend/security_audit.json
+frontend/npm_audit.json
+
+# Phase development notes (internal)
+PHASE3_*.md
+PHASE4_*.md
+TEST_PHASE0.md
+test_result.md
+backend_test.py
+check_db_state.py

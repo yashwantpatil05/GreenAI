@@ -1,0 +1,1 @@
+"""GreenAI backend package."""
